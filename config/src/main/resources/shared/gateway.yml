@@ -1,0 +1,54 @@
+
+hystrix:
+  command:
+    default:
+      execution:
+        iso lation:
+          thread:
+            timeoutInMilliseconds: 30000
+
+
+ribbon:
+  ReadTimeout: 60000
+  connection-timeout: 3000
+  eureka:
+    enabled: true
+
+zuul:
+  ignoredServices: '*'
+  host:
+    time-to-live: -1
+    connect-timeout-millis: 10000
+    max-per-route-connections: 10000
+    max-total-connections: 5000
+    socket-timeout-millis: 60000
+
+  routes:
+    auth-service:
+      path: /uaa/**
+      url: http://auth-service:5000
+      stripPrefix: false
+      sensitiveHeaders:
+
+    account-service:
+      path: /accounts/**
+      serviceId: account-service
+      stripPrefix: false
+      sensitiveHeaders:
+
+    ship-service:
+      path: /ship/**
+      serviceId: ship-service
+      stripPrefix: false
+      sensitiveHeaders:
+
+    excel-service:
+      path: /excel/**
+      serviceId: excel-service
+      stripPrefix: false
+      sensitiveHeaders:
+
+server:
+  port: 4000
+  servlet:
+    context-path: /api

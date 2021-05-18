@@ -1,0 +1,16 @@
+server:
+  servlet:
+    context-path: /uaa
+  port: 5000
+
+spring:
+  datasource:
+    url: jdbc:postgresql://auth-db:5432/${DB}
+    username: nikita
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
