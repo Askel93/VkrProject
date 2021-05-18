@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    - test
+  application:
+    name: ship-service
+  main.allow-bean-definition-overriding: true
+  mvc:
+    servlet:
+      load-on-startup: 1
