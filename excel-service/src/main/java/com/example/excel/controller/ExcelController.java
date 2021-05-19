@@ -36,9 +36,9 @@ public class ExcelController {
 			return ResponseEntity.badRequest().body("");
 	}
 
-	@GetMapping("/download")
+	@RequestMapping(value = "/download", method = RequestMethod.POST)
 	public ResponseEntity<?> downloadExcel(@RequestBody ListResponse listResponse,
-																												 @RequestParam(value = "name", required = false, defaultValue = "saveFile") String fileName) {
+																				 @RequestParam(value = "name", required = false, defaultValue = "saveFile") String fileName) {
 		try {
 			log.info(fileName);
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -58,6 +58,3 @@ public class ExcelController {
 		}
 	}
 }
-/*
-*
-* */

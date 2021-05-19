@@ -160,8 +160,9 @@ public abstract class ExcelParserBase {
 
 			} else if (t instanceof Integer) {
 				cell.setCellValue((Integer) t);
+			} else if (t instanceof Double) {
+				cell.setCellValue((Double) t);
 			}
-		} catch (NullPointerException ignored) {
-		}
+		} catch (NullPointerException ignored) {}
 	}
 }
