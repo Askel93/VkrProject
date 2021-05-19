@@ -1,0 +1,203 @@
+version: '2.1'
+services:
+
+  activemq:
+    image: rmohr/activemq:5.15.9-alpine
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    volumes: ["activemq-data:/opt/activemq/conf", "activemq-data:/data/activemq", "activemq-data:/var/log/activemq"]
+    environment:
+      ACTIVEMQ_REMOVE_DEFAULT_ACCOUNT: "true"
+      ACTIVEMQ_ADMIN_LOGIN: nikita
+      ACTIVEMQ_ADMIN_PASSWORD: $MQ_PASSWORD
+      ACTIVEMQ_ENABLED_SCHEDULER: "true"
+      ACTIVEMQ_MIN_MEMORY: 512
+      ACTIVEMQ_MAX_MEMORY: 2048
+
+
+  config:
+    environment:
+      CONFIG_SERVICE_PASSWORD: $CONFIG_SERVICE_PASSWORD
+    build: config
+    container_name: config
+    restart: always
+    ports:
+      - "8888:8888"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  registry:
+    environment:
+      CONFIG_SERVICE_PASSWORD: $CONFIG_SERVICE_PASSWORD
+    build: registry
+    container_name: registry
+    restart: always
+    depends_on:
+      config:
+        condition: service_healthy
+    ports:
+      - "8761:8761"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  gateway:
+    environment:
+      CONFIG_SERVICE_PASSWORD: $CONFIG_SERVICE_PASSWORD
+    build: ./gateway
+    container_name: gateway
+    restart: always
+    depends_on:
+      config:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  auth-service:
+    environment:
+      CONFIG_SERVICE_PASSWORD: $CONFIG_SERVICE_PASSWORD
+      ACCOUNT_SERVICE_PASSWORD: $ACCOUNT_SERVICE_PASSWORD
+      SHIP_SERVICE_PASSWORD: $SHIP_SERVICE_PASSWORD
+      EXCEL_SERVICE_PASSWORD: $EXCEL_SERVICE_PASSWORD
+      DB: $DB
+      SIGNING_KEY: $SIGNING_KEY
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    build: auth-service
+    container_name: auth-service
+    restart: always
+    depends_on:
+      config:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  auth-db:
+    image: postgres:13-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: nikita
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $DB
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.auth-db:/var/lib/postgresql/data
+
+  account-service:
+    environment:
+      CONFIG_SERVICE_PASSWORD: $CONFIG_SERVICE_PASSWORD
+      DB: $DB
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      ACCOUNT_SERVICE_PASSWORD: $ACCOUNT_SERVICE_PASSWORD
+    build: account-service
+    container_name: account-service
+    restart: always
+    depends_on:
+      config:
+        condition: service_healthy
+    ports:
+      - "6000:6000"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  account-db:
+    image: postgres:13-alpine
+    container_name: account-db
+    environment:
+      POSTGRES_USER: nikita
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $DB
+    ports:
+      - "6432:5432"
+    volumes:
+      - ./.account-db:/var/lib/postgresql/data
+
+  ship-service:
+    environment:
+      CONFIG_SERVICE_PASSWORD: $CONFIG_SERVICE_PASSWORD
+      MQ_PASSWORD: $MQ_PASSWORD
+      DB: $DB
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      SHIP_SERVICE_PASSWORD: $SHIP_SERVICE_PASSWORD
+    build: ship-service
+    container_name: ship-service
+    restart: always
+    depends_on:
+      config:
+        condition: service_healthy
+    ports:
+      - "7000:7000"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  ship-db:
+    image: postgres:13-alpine
+    container_name: ship-db
+    environment:
+      POSTGRES_USER: nikita
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $DB
+    ports:
+      - "7432:5432"
+    volumes:
+      - ./.ship-db:/var/lib/postgresql/data
+
+  excel-service:
+    environment:
+      CONFIG_SERVICE_PASSWORD: $CONFIG_SERVICE_PASSWORD
+      MQ_PASSWORD: $MQ_PASSWORD
+      EXCEL_SERVICE_PASSWORD: $EXCEL_SERVICE_PASSWORD
+    build: excel-service
+    container_name: excel-service
+    restart: always
+    depends_on:
+      config:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+  
+#  frontend:
+#    build:
+#      context: frontend
+#      target: prod
+#    container_name: frontend
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - './frontend:/app'
+#      - '/app/node_modules'
+      
+  nginx:
+    build:
+      context: nginx
+      target: prod
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+#      - frontend
+      - gateway
+
+volumes:
+  activemq-data: {}

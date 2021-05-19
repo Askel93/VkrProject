@@ -1,0 +1,7 @@
+.checked-tr {
+  background-color: #f5f5f5;
+}
+
+tbody tr:hover, .checked-tr:hover {
+  background-color: #eeeeee;
+}

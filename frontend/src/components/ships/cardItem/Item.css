@@ -1,0 +1,18 @@
+.card-item {
+  width: 20%;
+  margin-left: 2.5%;
+  margin-top: 2.5%;
+  margin-bottom: 1%;
+}
+
+@media all and (max-width: 768px) {
+  .card-item {
+    width: 30%;
+  }
+}
+
+@media all and (max-width: 600px) {
+  .card-item {
+    width: 45%;
+  }
+}
