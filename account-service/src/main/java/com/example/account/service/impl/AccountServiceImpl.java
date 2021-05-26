@@ -16,36 +16,36 @@ import java.util.Date;
 public class AccountServiceImpl implements AccountService {
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountRepository repository;
 
     @Autowired
-    private FeignAuthServiceClient authServiceClient;
+    private FeignAuthServiceClient client;
 
     @Override
     public Account getByUserName(String userName) {
-        return accountRepository
+        return repository
                 .findByName(userName)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("User with username %s not exists", userName)));
     }
 
     @Override
     public Account getByEmail(String email) {
-        return accountRepository
+        return repository
                 .findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("User with email %s not exists", email)));
     }
 
     @Override
     public Account createUser(AccountResponse accountResponse) {
-        accountRepository.findByName(accountResponse.getUserName())
+        repository.findByName(accountResponse.getUserName())
                 .ifPresent(it -> {
                     throw new ResourceExistsException(String.format("User with username %s already exists", it.getName()));
                 });
-        accountRepository.findByEmail(accountResponse.getEmail())
+        repository.findByEmail(accountResponse.getEmail())
                 .ifPresent(it -> {
                     throw new ResourceExistsException(String.format("User with email %s already exists", it.getEmail()));
                 });
-        authServiceClient.createUser(accountResponse);
+        client.createUser(accountResponse);
 
         Account account = Account.builder()
                 .email(accountResponse.getEmail())
@@ -55,6 +55,33 @@ public class AccountServiceImpl implements AccountService {
 
         account.setCreatedAt(createdAt.toInstant());
         account.setUpdatedAt(createdAt.toInstant());
-        return accountRepository.save(account);
+        return repository.save(account);
+    }
+
+    @Override
+    public void updateUser(AccountResponse response, String prevName) {
+        Account prevAccount = repository.findByName(prevName).orElseGet(() -> {
+            throw new ResourceNotFoundException(String.format("User with username %s not exists", prevName));
+        });
+        repository.findByName(response.getUserName())
+            .ifPresent(it -> {
+                if (!prevName.equals(it.getName())) {
+                    throw new ResourceExistsException(String.format("User with username %s already exists", response.getUserName()));
+                }
+            });
+        repository.findByEmail(response.getEmail())
+            .ifPresent(it -> {
+                if (!prevAccount.getEmail().equals(it.getEmail())) {
+                    throw new ResourceExistsException(String.format("User with email %s already exists", response.getEmail()));
+                }
+            });
+        if (prevAccount.isNew(response.getUserName(), response.getEmail())) {
+            response.setPrevName(prevName);
+            client.updateUser(response);
+        }
+        Date updatedAt = new Date();
+        repository.update(response.getUserName(),
+            response.getEmail(),
+            response.getFirstName(), response.getSecondName(), updatedAt.toInstant(), prevName);
     }
 }

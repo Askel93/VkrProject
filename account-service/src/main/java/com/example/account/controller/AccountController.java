@@ -22,26 +22,40 @@ public class AccountController {
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Principal principal) {
         log.info("retrieved profile {}", principal.getName());
-        return ResponseEntity.ok().body(accountService.getByUserName(principal.getName()));
+        return ResponseEntity
+            .ok()
+            .body(AccountResponse.toResponse(accountService.getByUserName(principal.getName())));
+    }
+
+    @PutMapping("/profile")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody AccountResponse accountResponse, Principal principal) {
+        log.info("update profile {}", accountResponse.getUserName());
+        accountService.updateUser(accountResponse, principal.getName());
+        return ResponseEntity
+            .ok()
+            .body("Update user success");
     }
 
     @GetMapping("/name/{userName}")
     public ResponseEntity<?> getAccountByUserName(@PathVariable("userName") String userName) {
         return ResponseEntity
-                .ok()
-                .body(accountService.getByUserName((userName)));
+            .ok()
+            .body(AccountResponse.toResponse(accountService.getByUserName((userName))));
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getAccountByEmail(@PathVariable("email") String email) {
         return ResponseEntity
-                .ok()
-                .body(accountService.getByEmail(email));
+            .ok()
+            .body(AccountResponse.toResponse(accountService.getByEmail(email)));
     }
 
     @PostMapping("/signUp")
     public ResponseEntity<?> createAccount(@Valid @RequestBody AccountResponse accountResponse) {
         log.info("create user");
-        return ResponseEntity.status(201).body(accountService.createUser(accountResponse));
+        return ResponseEntity
+            .status(201)
+            .body(AccountResponse.toResponse(accountService.createUser(accountResponse)));
     }
 }

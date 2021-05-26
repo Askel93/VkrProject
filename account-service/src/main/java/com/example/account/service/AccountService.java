@@ -29,4 +29,6 @@ public interface AccountService {
      * @return saved {@link Account}
      */
     Account createUser(AccountResponse accountResponse);
+
+    void updateUser(AccountResponse accountResponse, String prevName);
 }

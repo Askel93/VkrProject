@@ -48,5 +48,9 @@ public class Account {
     @LastModifiedDate
     @JsonIgnore
     private Instant updatedAt;
+
+    public boolean isNew(String name, String email) {
+        return !this.name.equals(name) || !this.email.equals(email);
+    }
 }
 
