@@ -3,6 +3,7 @@ package com.example.ship.repository.impl;
 import com.example.ship.repository.BaseRepository;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,5 +59,15 @@ public class BaseRepositoryImpl<T, ID extends Serializable>
             i++;
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllById(List<ID> listId) {
+        for (ID id : listId) {
+            try {
+                deleteById(id);
+            } catch (EmptyResultDataAccessException ignored) {}
+        }
     }
 }

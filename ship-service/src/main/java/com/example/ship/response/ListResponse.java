@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ListResponse {
+public class ListResponse<T> {
 
-	private List<Integer> listId;
+	private List<T> listId;
 }

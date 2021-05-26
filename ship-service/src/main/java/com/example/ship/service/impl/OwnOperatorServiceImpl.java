@@ -26,14 +26,19 @@ public class OwnOperatorServiceImpl extends BaseServiceImpl<OwnOperator, String>
 	}
 
 	@Override
-	public List<OwnOperator> findPage(int page, int size, String sort) {
+	public List<OwnOperator> findPage(int page, int size, String sort, String searchText) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sort));
-		return repository.findAll(pageable).getContent();
+		return repository.findAllWithSearch(pageable, searchText);
 	}
 
 	@Override
-	public Integer getCountPage(int size) {
-		double count = repository.count();
+	public Integer getCountPage(int size, String searchText) {
+		double count = repository.getCount(searchText);
 		return (int) Math.ceil(count / size);
+	}
+
+	@Override
+	public void deleteAllById(List<String> listId) {
+		repository.deleteAllById(listId);
 	}
 }
