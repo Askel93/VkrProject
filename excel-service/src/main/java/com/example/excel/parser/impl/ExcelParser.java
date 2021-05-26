@@ -1,7 +1,7 @@
 package com.example.excel.parser.impl;
 
 import com.example.excel.model.*;
-import com.example.excel.parser.BaseParser;
+import com.example.excel.parser.ExcelParserBase;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
@@ -11,18 +11,18 @@ import java.util.*;
 
 @Component("excelParser")
 @Slf4j
-public class ExcelParser implements BaseParser<ParseModel> {
+public class ExcelParser extends ExcelParserBase<ParseModel> {
 
 	@Resource(name = "shipParser")
-	private BaseParser<Ship> shipParser;
+	private ExcelParserBase<Ship> shipParser;
 	@Resource(name = "dimensionsParser")
-	private BaseParser<ShipDimensions> dimensionsParser;
+	private ExcelParserBase<ShipDimensions> dimensionsParser;
 	@Resource(name = "capacityParser")
-	private BaseParser<ShipCapacity> capacityParser;
+	private ExcelParserBase<ShipCapacity> capacityParser;
 	@Resource(name = "enginesParser")
-	private BaseParser<List<Engine>> enginesParser;
+	private ExcelParserBase<List<Engine>> enginesParser;
 	@Resource(name = "ownOperatorParser")
-	private BaseParser<List<OwnOperator>> ownOperatorParser;
+	private ExcelParserBase<List<OwnOperator>> ownOperatorParser;
 
 	@Override
 	public ParseResult<ParseModel> parse(Row row) {

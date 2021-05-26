@@ -2,13 +2,12 @@ package com.example.excel.parser.impl;
 
 import com.example.excel.model.ParseResult;
 import com.example.excel.model.Ship;
-import com.example.excel.parser.BaseParser;
 import com.example.excel.parser.ExcelParserBase;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
 
 @Component("shipParser")
-public class ShipParser extends ExcelParserBase implements BaseParser<Ship> {
+public class ShipParser extends ExcelParserBase<Ship> {
 
 	@Override
 	public ParseResult<Ship> parse(Row row) {

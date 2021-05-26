@@ -2,7 +2,6 @@ package com.example.excel.parser.impl;
 
 import com.example.excel.model.Engine;
 import com.example.excel.model.ParseResult;
-import com.example.excel.parser.BaseParser;
 import com.example.excel.parser.ExcelParserBase;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @SuppressWarnings("SpellCheckingInspection")
 @Component("enginesParser")
-public class EnginesParser extends ExcelParserBase implements BaseParser<List<Engine>> {
+public class EnginesParser extends ExcelParserBase<List<Engine>> {
 
 	@Override
 	public ParseResult<List<Engine>> parse(Row row) {

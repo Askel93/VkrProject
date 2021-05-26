@@ -1,16 +1,32 @@
 package com.example.excel.parser;
 
+import com.example.excel.model.ParseResult;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 
 import java.util.Arrays;
 
-public abstract class ExcelParserBase {
+public abstract class ExcelParserBase<T> {
 
 	protected static final int[] SHIP_INDEX = new int[]{0, 1, 2, 3, 4, 5, 6, 12, 13, 30};
 	protected static final int[] ENGINE_INDEX = new int[]{14, 17, 20, 23};
 	protected static final int[] OWN_INDEX = new int[]{31, 32, 33, 34, 35};
 	protected static final int[] SHIP_CAPACITY_INDEX = new int[]{7, 8, 9, 10, 11};
 	protected static final int[] SHIP_DIMENSIONS_INDEX = new int[]{24, 25, 26, 27, 28, 29};
+
+	/**
+	 * Parse {@link Row} to {@link T}
+	 * @param row must not be {@literal null}
+	 * @return {@link ParseResult}
+	 */
+	public abstract ParseResult<T> parse(Row row);
+
+	/**
+	 * Parse {@link T} to given {@link Row}
+	 * @param t must not be {@literal null}
+	 * @param row must not be {@literal null}
+	 */
+	public abstract void parseToExcel(T t, Row row);
 
 	/**
 	 * Parse {@link Cell} to {@link String idShip}
@@ -21,7 +37,9 @@ public abstract class ExcelParserBase {
 	 */
 	public int regNumParser(Cell cell) throws NumberFormatException, NullPointerException {
 		String input = parser(cell);
-		return (int) Double.parseDouble(input);
+		int regNum = Integer.parseInt(input);
+		if (regNum < 0) throw new NullPointerException();
+		return regNum;
 	}
 
 	/**
@@ -147,21 +165,21 @@ public abstract class ExcelParserBase {
 	 * Parse given {@code T} to {@link Cell}
 	 *
 	 * @param cell must not be {@literal null}
-	 * @param t can be {@literal null}
+	 * @param s can be {@literal null}
 	 */
-	protected <T> void parser(Cell cell, T t) {
+	protected <S> void parser(Cell cell, S s) {
 		try {
-			if (t == null) {
+			if (s == null) {
 				cell.setCellValue("NULL");
 				return;
 			}
-			if (t instanceof String) {
-				cell.setCellValue((String) t);
+			if (s instanceof String) {
+				cell.setCellValue((String) s);
 
-			} else if (t instanceof Integer) {
-				cell.setCellValue((Integer) t);
-			} else if (t instanceof Double) {
-				cell.setCellValue((Double) t);
+			} else if (s instanceof Integer) {
+				cell.setCellValue((Integer) s);
+			} else if (s instanceof Double) {
+				cell.setCellValue((Double) s);
 			}
 		} catch (NullPointerException ignored) {}
 	}

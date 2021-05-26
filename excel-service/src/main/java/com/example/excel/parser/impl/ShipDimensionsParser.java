@@ -2,14 +2,13 @@ package com.example.excel.parser.impl;
 
 import com.example.excel.model.ParseResult;
 import com.example.excel.model.ShipDimensions;
-import com.example.excel.parser.BaseParser;
 import com.example.excel.parser.ExcelParserBase;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
 
 @SuppressWarnings("SpellCheckingInspection")
 @Component("dimensionsParser")
-public class ShipDimensionsParser extends ExcelParserBase implements BaseParser<ShipDimensions> {
+public class ShipDimensionsParser extends ExcelParserBase<ShipDimensions> {
 
 
 	@Override

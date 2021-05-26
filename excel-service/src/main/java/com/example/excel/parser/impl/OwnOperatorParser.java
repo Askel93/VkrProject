@@ -2,7 +2,6 @@ package com.example.excel.parser.impl;
 
 import com.example.excel.model.OwnOperator;
 import com.example.excel.model.ParseResult;
-import com.example.excel.parser.BaseParser;
 import com.example.excel.parser.ExcelParserBase;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.stereotype.Component;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component("ownOperatorParser")
-public class OwnOperatorParser extends ExcelParserBase implements BaseParser<List<OwnOperator>> {
+public class OwnOperatorParser extends ExcelParserBase<List<OwnOperator>> {
 
 	@Override
 	public ParseResult<List<OwnOperator>> parse(Row row) {
