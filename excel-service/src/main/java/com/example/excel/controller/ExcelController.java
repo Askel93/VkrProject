@@ -37,15 +37,28 @@ public class ExcelController {
 	}
 
 	@RequestMapping(value = "/download", method = RequestMethod.POST)
-	public ResponseEntity<?> downloadExcel(@RequestBody ListResponse listResponse,
-																				 @RequestParam(value = "name", required = false, defaultValue = "saveFile") String fileName) {
+	public ResponseEntity<?> downloadExcel(@RequestBody ListResponse<Integer> listResponse) {
 		try {
-			log.info(fileName);
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			Workbook workbook = excelService.downloadExcel(listResponse);
+			return download(excelService.downloadExcel(listResponse));
+		} catch (Exception e) {
+			return new ResponseEntity<>("error id load", null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
+	@RequestMapping(value = "/download/own", method = RequestMethod.POST)
+	public ResponseEntity<?> downloadByOwnOperator(@RequestBody ListResponse<String> listResponse) {
+		try {
+			return download(excelService.dowloadByOwnOperator(listResponse));
+		} catch (Exception e) {
+			return new ResponseEntity<>("error id load", null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private ResponseEntity<?> download(Workbook workbook) {
+		try {
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			HttpHeaders header = new HttpHeaders();
-			fileName += ".xlsx";
+			var fileName = "fileName.xlsx";
 			header.setContentType(new MediaType("application", "force-download"));
 			header.set(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s", fileName));
 

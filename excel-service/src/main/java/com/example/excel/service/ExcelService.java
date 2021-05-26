@@ -20,5 +20,7 @@ public interface ExcelService {
 	 * @param listResponse must not be {@literal null}. {@link List} id {@link Ship}
 	 * @return {@link XSSFWorkbook}
 	 */
-	XSSFWorkbook downloadExcel(ListResponse listResponse) throws Exception ;
+	XSSFWorkbook downloadExcel(ListResponse<Integer> listResponse) throws Exception ;
+
+	XSSFWorkbook dowloadByOwnOperator(ListResponse<String> listResponse) throws Exception;
 }

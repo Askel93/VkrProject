@@ -5,7 +5,7 @@ import com.example.excel.controller.JmsProducer;
 import com.example.excel.model.OwnOperator;
 import com.example.excel.model.ParseModel;
 import com.example.excel.model.Ship;
-import com.example.excel.parser.BaseParser;
+import com.example.excel.parser.ExcelParserBase;
 import com.example.excel.response.JmsResponse;
 import com.example.excel.response.ListResponse;
 import com.example.excel.service.ExcelService;
@@ -34,7 +34,7 @@ import java.util.Map;
 public class ExcelServiceImpl implements ExcelService {
 
 	@Resource(name = "excelParser")
-	private BaseParser<ParseModel> parser;
+	private ExcelParserBase<ParseModel> parser;
 
 	@Autowired
 	private JmsProducer jmsProducer;
@@ -83,15 +83,22 @@ public class ExcelServiceImpl implements ExcelService {
 	}
 
 	@Override
-	public XSSFWorkbook downloadExcel(ListResponse listResponse) throws Exception {
+	public XSSFWorkbook downloadExcel(ListResponse<Integer> listResponse) throws Exception {
+
+		var ships = objectToList(client.getAllById(listResponse));
+
+		return createWorkbook(ships);
+	}
+
+	@Override
+	public XSSFWorkbook dowloadByOwnOperator(ListResponse<String> listResponse) throws Exception {
+
+		var ships = objectToList(client.getAllByOwnOperator(listResponse));
+		return createWorkbook(ships);
+	}
+
+	private XSSFWorkbook createWorkbook(List<Ship> ships) throws Exception {
 		try {
-			log.info("parse to excel, {}", listResponse.toString());
-
-			var response = client.getAllById(listResponse);
-			var ships = mapper.convertValue(response, new TypeReference<List<Ship>>() {});
-
-			log.info("{}", ships.size());
-
 			XSSFWorkbook workbook = new XSSFWorkbook();
 
 			XSSFSheet sheet = workbook.createSheet("Ships");
@@ -106,9 +113,8 @@ public class ExcelServiceImpl implements ExcelService {
 			throw new Exception(e.getMessage());
 		}
 	}
-}
-/*
-*
-*
 
-* */
+	private List<Ship> objectToList(Object object) {
+		return mapper.convertValue(object, new TypeReference<>() {});
+	}
+}

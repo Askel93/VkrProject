@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ListResponse {
+public class ListResponse<T> {
 
-	private List<Integer> listId;
+	private List<T> listId;
 }
