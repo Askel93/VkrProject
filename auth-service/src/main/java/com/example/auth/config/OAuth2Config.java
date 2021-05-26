@@ -33,6 +33,9 @@ public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private RestAuthEntryPoint entryPoint;
+
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
         endpoints.authenticationManager(authenticationManager)
@@ -47,6 +50,7 @@ public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
         security
             .tokenKeyAccess("permitAll()")
             .checkTokenAccess("permitAll()")
+            .authenticationEntryPoint(entryPoint)
             .passwordEncoder(NoOpPasswordEncoder.getInstance())
         ;
     }
