@@ -1,6 +1,7 @@
 package com.example.ship.repository;
 
 import com.example.ship.model.Ship;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
@@ -15,9 +16,11 @@ public interface ShipRepository extends BaseRepository<Ship, Integer> {
 	 */
 	Ship update(Ship ship);
 
-	Ship findByIdWithFetch(Integer id);
-
-	void deleteAllById(List<Integer> listId);
-
 	List<Ship> findAllByIdWithFetch(List<Integer> listId);
+
+	List<Ship> findAllByOwnOperator(List<String> listId);
+
+	long getCount(String searchText);
+
+	List<Ship> findAllWithSearch(Pageable pageable, String searchText);
 }

@@ -23,18 +23,18 @@ public class ShipServiceImpl extends BaseServiceImpl<Ship, Integer> implements S
 
     @Override
     public Ship findById(Integer id) throws ResourceNotFoundException {
-        return repository.findByIdWithFetch(id);
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format("Ship with id %s not found", id)));
     }
 
     @Override
-    public List<Ship> findPage(int page, int size, String sort) {
+    public List<Ship> findPage(int page, int size, String sort, String searchText) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sort));
-        return repository.findAll(pageable).getContent();
+        return repository.findAllWithSearch(pageable, searchText);
     }
 
     @Override
-    public Integer getCountPage(int size) {
-        double count = repository.count();
+    public Integer getCountPage(int size, String searchText) {
+        double count = repository.getCount(searchText);
         return (int) Math.ceil(count / size);
     }
 
@@ -54,5 +54,10 @@ public class ShipServiceImpl extends BaseServiceImpl<Ship, Integer> implements S
     @Override
     public List<Ship> getAllById(List<Integer> listId) {
         return repository.findAllByIdWithFetch(listId);
+    }
+
+    @Override
+    public List<Ship> getAllByOwnOperator(List<String> listId) {
+        return repository.findAllByOwnOperator(listId);
     }
 }
