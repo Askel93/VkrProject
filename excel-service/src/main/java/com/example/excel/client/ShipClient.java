@@ -9,11 +9,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @FeignClient(name = "ship-service")
 public interface ShipClient {
 
-	@RequestMapping(
-			method = RequestMethod.POST,
-			value = "/ship/ship/toExcel",
-			consumes = MediaType.APPLICATION_JSON_VALUE,
-			produces = MediaType.APPLICATION_JSON_VALUE
-	)
-	Object getAllById(ListResponse listResponse);
+	@RequestMapping(value = "/ship/toExcel", method = RequestMethod.POST)
+	Object getAllById(ListResponse<Integer> listResponse);
+
+	@RequestMapping(value = "/ship/own/ToExcel", method = RequestMethod.POST)
+	Object getAllByOwnOperator(ListResponse<String> listResponse);
 }
