@@ -50,44 +50,27 @@ public class ShipController extends BaseController<Ship, Integer> {
 
     @GetMapping("")
     @JsonView(View.UI.class)
-    public ResponseEntity<?> getShipsWithSort(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+    public ResponseEntity<?> getShipsWithSort(@RequestParam(value = "page", required = false, defaultValue = "1") int page,
                                               @RequestParam(value = "size", required = false, defaultValue = "20") int size,
-                                              @RequestParam(value = "sort", required = false, defaultValue = "id") String sort) {
+                                              @RequestParam(value = "sort", required = false, defaultValue = "id") String sort,
+                                              @RequestParam(value = "search", required = false, defaultValue = "") String searchText) {
         log.info("fetch page {} with size {} and sort {}", page, size, sort);
-        return ResponseEntity.ok(service.findPage(page - 1, size, sort));
+        return ResponseEntity.ok(service.findPage(page - 1, size, sort, searchText));
     }
 
     @GetMapping("/count")
-    public ResponseEntity<?> getCountPage(@RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+    public ResponseEntity<?> getCountPage(
+        @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+        @RequestParam(value = "search", required = false, defaultValue = "") String searchText) {
         log.info("get count page");
-        return ResponseEntity.ok(service.getCountPage(size));
+        return ResponseEntity.ok(service.getCountPage(size, searchText));
     }
 
     @DeleteMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteAllById(@RequestBody ListResponse listResponse) {
+    public ResponseEntity<?> deleteAllById(@RequestBody ListResponse<Integer> listResponse) {
         log.info("delete ships");
         service.deleteAllById(listResponse.getListId());
         return ResponseEntity.ok("Delete success");
-    }
-
-    @PreAuthorize("#oauth2.hasScope('server')")
-    @JsonView(View.UI.class)
-    @RequestMapping(
-        value = "/toExcel",
-        method = RequestMethod.POST,
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    @ResponseBody
-    public List<ShipResponse> getAllById(@RequestBody ListResponse listResponse) {
-        log.info("get ships to excel");
-        List<ShipResponse> ships = service.getAllById(listResponse.getListId())
-            .stream()
-            .map(ShipResponse::toResponse)
-            .collect(Collectors.toList())
-            ;
-        log.info("{}", ships.size());
-        return ships;
     }
 }
