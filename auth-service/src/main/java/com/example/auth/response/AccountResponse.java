@@ -7,6 +7,7 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 public class AccountResponse {
+    private String prevName;
     @NotBlank
     private String userName;
     @NotBlank
