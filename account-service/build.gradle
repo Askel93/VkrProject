@@ -6,6 +6,7 @@ plugins {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
+//noinspection GroovyUnusedAssignment
 sourceCompatibility = '11'
 
 configurations {
@@ -19,6 +20,7 @@ repositories {
 }
 
 ext {
+	//noinspection GrUnresolvedAccess
 	set('springCloudVersion', "Hoxton.SR10")
 }
 
@@ -40,6 +42,8 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
 	implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
+
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache', version: '2.5.0'
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
