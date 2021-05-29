@@ -79,7 +79,7 @@ public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
             .withClient("browser")
             .authorizedGrantTypes("refresh_token", "password")
             .scopes("ui")
-            .accessTokenValiditySeconds(180)
+            .accessTokenValiditySeconds(1800)
             .refreshTokenValiditySeconds(864000)
         ;
     }
