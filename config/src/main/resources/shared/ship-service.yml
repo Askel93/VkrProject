@@ -12,6 +12,19 @@ server:
     context-path: /ship
   port: 7000
 
+info:
+  component: ship-service
+
+eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 1
+    metadataMap:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+    statusPageUrlPath: ${server.servlet.context-path}/info
+    healthCheckUrlPath: ${server.servlet.context-path}/health
+
 spring:
   main:
     allow-bean-definition-overriding: true
@@ -33,9 +46,13 @@ spring:
     properties:
       hibernate:
         jdbc:
-          batch_size: 20
+          batch_size: 40
         order_inserts: true
         order_updates: true
+  boot.admin.client:
+    instance.metadata.user:
+      name: ${spring.application.name}
+      password: ${SHIP_SERVICE_PASSWORD}
 
 feign:
   hystrix:
@@ -44,6 +61,9 @@ feign:
     connectTimeout: 160000000
     readTimeout: 160000000
 
-logging.level.org.hibernate:
-#  SQL: DEBUG
-  persister.entity: ERROR
+
+logging:
+  level:
+    org.hibernate:
+       SQL: DEBUG
+  # persister.entity: ERROR

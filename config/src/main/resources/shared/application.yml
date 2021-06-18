@@ -10,7 +10,10 @@ mq:
     stomp-port: 61613
   url: tcp://${mq.server.host}:${mq.server.port}
 
+
 hystrix:
+  dashboard.proxy-stream-allow-list:
+    - 'localhost'
   command:
     default:
       execution:
@@ -43,6 +46,10 @@ spring:
       FAIL_ON_UNKNOWN_PROPERTIES: false
     mapper:
       DEFAULT_VIEW_INCLUSION: true
+  boot.admin.client:
+#    username: admin
+#    password: admin-password
+    url: http://registry:8761/admin
 
 server:
   servlet:
@@ -55,3 +62,9 @@ server:
   compression:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+management:
+  endpoint.health.show-details: ALWAYS
+  endpoints.web:
+    exposure.include: '*'
+    base-path: /

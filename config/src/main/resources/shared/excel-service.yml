@@ -13,11 +13,28 @@ spring:
     password: ${mq.pass}
     in-memory: false
     broker-url: ${mq.url}
+  boot.admin.client:
+    instance.metadata.user:
+      name: ${spring.application.name}
+      password: ${EXCEL_SERVICE_PASSWORD}
+
+info:
+  component: excel-service
 
 server:
   servlet:
     context-path: /excel
   port: 8000
+
+eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 1
+    metadataMap:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+    statusPageUrlPath: ${server.servlet.context-path}/info
+    healthCheckUrlPath: ${server.servlet.context-path}/health
 
 feign:
   hystrix:

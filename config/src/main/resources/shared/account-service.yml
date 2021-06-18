@@ -32,3 +32,11 @@ spring:
     hibernate:
       ddl-auto: update
     generate-ddl: true
+  boot.admin.client:
+    instance.metadata.user:
+      name: ${spring.application.name}
+      password: ${ACCOUNT_SERVICE_PASSWORD}
+
+logging:
+  pattern:
+    console:
