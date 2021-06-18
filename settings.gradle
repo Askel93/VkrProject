@@ -1,3 +1,9 @@
 rootProject.name = 'vkr'
 
-
+include 'account-service'
+include 'auth-service'
+include 'config'
+include 'excel-service'
+include 'gateway'
+include 'registry'
+include 'ship-service'

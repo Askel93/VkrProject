@@ -27,10 +27,10 @@ public class ExcelController {
 	public ResponseEntity<?> parseExcel(@RequestParam("file") MultipartFile file) {
 		if (!file.isEmpty()) {
 
-			final long start = LocalTime.now().toNanoOfDay();
+			final long start = System.currentTimeMillis();
 			String resError = excelService.parser(file);
 			final long end = LocalTime.now().minusNanos(start).toNanoOfDay();
-			System.out.println(end);
+			log.info("{}", System.currentTimeMillis() - start);
 			return ResponseEntity.status(201).body(resError);
 		} else
 			return ResponseEntity.badRequest().body("");
