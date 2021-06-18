@@ -2,7 +2,9 @@ package com.example.account.repository;
 
 import com.example.account.model.Account;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +16,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("NullableProblems")
 @Repository
 public interface AccountRepository extends JpaRepository<Account, UUID> {
     @Cacheable(value = "users", key = "#name")
@@ -21,6 +24,15 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     @Cacheable(value = "usersEmail", key = "#email")
     Optional<Account> findByEmail(String email);
+
+    @Override
+    @Caching(
+        put = {
+            @CachePut(value = "users", key = "#user.name"),
+            @CachePut(value = "usersEmail", key = "#user.email")
+        }
+    )
+    <S extends Account> S save(S user);
 
     @CacheEvict(value = { "users", "usersEmail"}, allEntries = true)
     @Modifying

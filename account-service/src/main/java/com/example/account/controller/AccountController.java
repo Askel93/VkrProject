@@ -10,13 +10,14 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
 public class AccountController {
 
     @Autowired
-    private AccountService accountService;
+    private AccountService service;
 
     @PreAuthorize("hasRole('USER') or #oauth2.hasScope('ui')")
     @GetMapping("/profile")
@@ -24,14 +25,14 @@ public class AccountController {
         log.info("retrieved profile {}", principal.getName());
         return ResponseEntity
             .ok()
-            .body(AccountResponse.toResponse(accountService.getByUserName(principal.getName())));
+            .body(AccountResponse.toResponse(service.getByUserName(principal.getName())));
     }
 
     @PutMapping("/profile")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> updateProfile(@Valid @RequestBody AccountResponse accountResponse, Principal principal) {
         log.info("update profile {}", accountResponse.getUserName());
-        accountService.updateUser(accountResponse, principal.getName());
+        service.updateUser(accountResponse, principal.getName());
         return ResponseEntity
             .ok()
             .body("Update user success");
@@ -41,14 +42,14 @@ public class AccountController {
     public ResponseEntity<?> getAccountByUserName(@PathVariable("userName") String userName) {
         return ResponseEntity
             .ok()
-            .body(AccountResponse.toResponse(accountService.getByUserName((userName))));
+            .body(AccountResponse.toResponse(service.getByUserName((userName))));
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getAccountByEmail(@PathVariable("email") String email) {
         return ResponseEntity
             .ok()
-            .body(AccountResponse.toResponse(accountService.getByEmail(email)));
+            .body(AccountResponse.toResponse(service.getByEmail(email)));
     }
 
     @PostMapping("/signUp")
@@ -56,6 +57,18 @@ public class AccountController {
         log.info("create user");
         return ResponseEntity
             .status(201)
-            .body(AccountResponse.toResponse(accountService.createUser(accountResponse)));
+            .body(AccountResponse.toResponse(service.createUser(accountResponse)));
+    }
+
+    @GetMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getUsers() {
+        return ResponseEntity
+            .ok()
+            .body(service.getUsers()
+                .stream()
+                .map(AccountResponse::toResponse)
+                .collect(Collectors.toList())
+            );
     }
 }

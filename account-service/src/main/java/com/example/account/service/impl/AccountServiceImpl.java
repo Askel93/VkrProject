@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -36,6 +37,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public List<Account> getUsers() {
+        return repository.findAll();
+    }
+
+    @Override
     public Account createUser(AccountResponse accountResponse) {
         repository.findByName(accountResponse.getUserName())
                 .ifPresent(it -> {
@@ -50,6 +56,8 @@ public class AccountServiceImpl implements AccountService {
         Account account = Account.builder()
                 .email(accountResponse.getEmail())
                 .name(accountResponse.getUserName())
+                .firstName(accountResponse.getFirstName())
+                .secondName(accountResponse.getSecondName())
                 .build();
         Date createdAt = new Date();
 
@@ -80,8 +88,7 @@ public class AccountServiceImpl implements AccountService {
             client.updateUser(response);
         }
         Date updatedAt = new Date();
-        repository.update(response.getUserName(),
-            response.getEmail(),
-            response.getFirstName(), response.getSecondName(), updatedAt.toInstant(), prevName);
+        repository.update(response.getUserName(), response.getEmail(), response.getFirstName(),
+            response.getSecondName(), updatedAt.toInstant(), prevName);
     }
 }

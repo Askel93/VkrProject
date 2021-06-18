@@ -5,6 +5,8 @@ import com.example.account.exception.ResourceNotFoundException;
 import com.example.account.model.Account;
 import com.example.account.response.AccountResponse;
 
+import java.util.List;
+
 public interface AccountService {
     /**
      * Retrieve {@link Account} for the given {@code userName}
@@ -20,6 +22,8 @@ public interface AccountService {
      * @return {@link Account}
      */
     Account getByEmail(String email);
+
+    List<Account> getUsers();
 
     /**
      * Save {@link Account} for the given {@link AccountResponse}
