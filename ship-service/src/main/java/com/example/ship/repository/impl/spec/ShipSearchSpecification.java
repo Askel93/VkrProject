@@ -35,22 +35,22 @@ public class ShipSearchSpecification implements Specification<Ship> {
 			predicates.add(builder.or(searchPredicates.toArray(new Predicate[] {})));
 		}
 		if (!filters.isShipFilterEmpty()) {
-			if (filters.getSpeed() != null) {
-				predicates.add(builder.between(root.get("speed"), filters.getSpeed().getMin(), filters.getSpeed().getMax()));
+			if (filters.getNs() != null) {
+				predicates.add(builder.between(root.get("speed"), filters.getNs(), filters.getXs()));
 			}
-			if (filters.getType() != null) {
+			if (filters.getTs() != null) {
 				List<Predicate> typePredicates = new ArrayList<>();
-				filters.getType().forEach(type ->
+				filters.getTs().forEach(type ->
 						typePredicates.add(builder.equal(root.get("type"), type)));
 
 				predicates.add(builder.or(typePredicates.toArray(new Predicate[] {})));
 			}
-			if (filters.getGodP() != null) {
-				predicates.add(builder.between(root.get("godP"), filters.getGodP().getMin(), filters.getGodP().getMax()));
+			if (filters.getNg() != null) {
+				predicates.add(builder.between(root.get("godP"), filters.getNg(), filters.getXg()));
 			}
-			if (filters.getPort() != null) {
+			if (filters.getPs() != null) {
 				List<Predicate> portPredicates = new ArrayList<>();
-				filters.getPort().forEach(port ->
+				filters.getPs().forEach(port ->
 						portPredicates.add(builder.equal(root.get("port"), port)));
 				predicates.add(builder.or(portPredicates.toArray(new Predicate[] {})));
 			}
