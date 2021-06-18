@@ -43,4 +43,12 @@ public class Account {
     @Column(name = "role_id")
     @JsonIgnore
     private Set<Role> roleSet;
+
+    public boolean isAdmin() {
+        return roleSet.contains(Role.ADMIN);
+    }
+
+    public void addRole(Role role) {
+        roleSet.add(role);
+    }
 }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -31,10 +32,7 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
 
     @Override
     public Account createAccount(AccountResponse accountResponse) {
-        Account account = Account.builder()
-                .email(accountResponse.getEmail())
-                .userName(accountResponse.getUserName())
-                .build();
+        Account account = accountResponse.toAccount();
         String hash = encoder.encode(accountResponse.getPassword());
         account.setPassword(hash);
         account.setRoleSet(Set.of(Role.USER));
@@ -53,6 +51,24 @@ public class AccountServiceImpl implements AccountService, UserDetailsService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad password");
         }
         repository.update(response.getUserName(), response.getEmail(), response.getPrevName());
+    }
+
+    @Override
+    public List<Account> getUsers() {
+        return repository.findAll();
+    }
+
+    @Override
+    public void addToAdmin(String userName) {
+        Account account = repository
+            .findByUserName(userName)
+            .orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("Account with username %s not found", userName)));
+
+        if (account.isAdmin()) return;
+        account.addRole(Role.ADMIN);
+        repository.save(account);
     }
 
     @Override
