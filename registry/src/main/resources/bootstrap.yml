@@ -7,6 +7,8 @@ spring:
       fail-fast: true
       password: ${CONFIG_SERVICE_PASSWORD}
       username: user
+  main:
+    banner-mode: off
 
 eureka:
   instance:
