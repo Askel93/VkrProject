@@ -11,3 +11,5 @@ spring:
   mvc:
     servlet:
       load-on-startup: 1
+  main:
+    banner-mode: off

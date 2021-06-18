@@ -12,10 +12,8 @@ import com.example.excel.service.ExcelService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +89,7 @@ public class ExcelServiceImpl implements ExcelService {
 	}
 
 	@Override
-	public XSSFWorkbook dowloadByOwnOperator(ListResponse<String> listResponse) throws Exception {
+	public XSSFWorkbook downloadByOwnOperator(ListResponse<String> listResponse) throws Exception {
 
 		var ships = objectToList(client.getAllByOwnOperator(listResponse));
 		return createWorkbook(ships);

@@ -22,5 +22,5 @@ public interface ExcelService {
 	 */
 	XSSFWorkbook downloadExcel(ListResponse<Integer> listResponse) throws Exception ;
 
-	XSSFWorkbook dowloadByOwnOperator(ListResponse<String> listResponse) throws Exception;
+	XSSFWorkbook downloadByOwnOperator(ListResponse<String> listResponse) throws Exception;
 }

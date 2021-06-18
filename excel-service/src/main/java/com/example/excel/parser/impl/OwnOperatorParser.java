@@ -32,11 +32,15 @@ public class OwnOperatorParser extends ExcelParserBase<List<OwnOperator>> {
 	private OwnOperator parseOwnOperator(Row row, int index) {
 		try {
 			String name = idOwnOperator(row.getCell(OWN_INDEX[0] + index));
+			if (isOwnOperatorContains(name)) {
+				return ownOperatorMap.get(name);
+			}
 			String address = textParser(row.getCell(OWN_INDEX[1] + index));
 			String[] phones = phonesParser(row.getCell(OWN_INDEX[2] + index));
 			String email = textParser(row.getCell(OWN_INDEX[3] + index));
 			String[] fax = phonesParser(row.getCell(OWN_INDEX[4] + index));
-
+			var ownOperator = new OwnOperator(name, address, phones, email, fax);
+			ownOperatorMap.put(name, ownOperator);
 			return new OwnOperator(name, address, phones, email, fax);
 		} catch (NullPointerException | NumberFormatException e) {
 			return null;

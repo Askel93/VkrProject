@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
+import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
+import org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -13,7 +16,11 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+		TaskExecutionAutoConfiguration.class,
+		TaskSchedulingAutoConfiguration.class,
+		WebSocketServletAutoConfiguration.class
+})
 @EnableDiscoveryClient
 @EnableOAuth2Client
 @EnableFeignClients

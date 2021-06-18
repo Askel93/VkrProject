@@ -1,18 +1,96 @@
 package com.example.excel.parser;
 
+import com.example.excel.model.OwnOperator;
 import com.example.excel.model.ParseResult;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+@SuppressWarnings("SpellCheckingInspection")
+@Slf4j
 public abstract class ExcelParserBase<T> {
 
 	protected static final int[] SHIP_INDEX = new int[]{0, 1, 2, 3, 4, 5, 6, 12, 13, 30};
 	protected static final int[] ENGINE_INDEX = new int[]{14, 17, 20, 23};
 	protected static final int[] OWN_INDEX = new int[]{31, 32, 33, 34, 35};
 	protected static final int[] SHIP_CAPACITY_INDEX = new int[]{7, 8, 9, 10, 11};
+	private static final Pattern phonePrefixPattern = Pattern.compile("(([+]?7)|8)([-\\s]?\\d{2,4}[-]?)");
+	private static final String phonesPattern = "(?=(.*\\d){9,})([+]?.*[-\\s])([-\\s]?[(]?\\d{2,4}[)]?){4}\\D*";
 	protected static final int[] SHIP_DIMENSIONS_INDEX = new int[]{24, 25, 26, 27, 28, 29};
+	protected static final String[] HEADER = new String[] {
+			"Name",
+			"Naznachenie",
+			"sub_nazn",
+			"Reg_num",
+			"IMO",
+			"call_sign",
+			"project",
+			"dedv",
+			"pass_k",
+			"pass_p",
+			"GT",
+			"NT",
+			"Port",
+			"GodP",
+			"eng1",
+			"eng2",
+			"eng3",
+			"eng1pwr",
+			"eng2pwr",
+			"eng3pwr",
+			"DVIG1",
+			"DVIG2",
+			"DVIG3",
+			"sum_pwr",
+			"Class",
+			"disp",
+			"Length",
+			"Breadth"	,
+			"Depth",
+			"Draught",
+			"Speed",
+			"Own",
+			"Own_address",
+			"Own_phone",
+			"Own_email",
+			"Own_fax",
+			"Operator",
+			"Operator_address",
+			"Operator_phone",
+			"Operator_email",
+			"Operator_fax"
+	};
+	protected Map<String, OwnOperator> ownOperatorMap = new HashMap<>();
+
+	public boolean isOwnOperatorContains(String name) {
+		if (ownOperatorMap.size() > 2000) {
+			ownOperatorMap.clear();
+			return false;
+		}
+		return ownOperatorMap.containsKey(name);
+	}
+
+	@SuppressWarnings("unused")
+	public void createHeader(Row row, XSSFFont font) {
+		font.setFontHeightInPoints((short)10);
+		font.setFontName("Arial");
+		font.setColor(IndexedColors.WHITE.getIndex());
+		font.setBold(true);
+		font.setItalic(false);
+		CellStyle style = row.getRowStyle();
+		style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		style.setAlignment(HorizontalAlignment.CENTER);
+		style.setFont(font);
+		for (var i = 0; i < HEADER.length; i++) {
+			row.createCell(i).setCellValue(HEADER[i]);
+		}
+	}
 
 	/**
 	 * Parse {@link Row} to {@link T}
@@ -37,8 +115,8 @@ public abstract class ExcelParserBase<T> {
 	 */
 	public int regNumParser(Cell cell) throws NumberFormatException, NullPointerException {
 		String input = parser(cell);
-		int regNum = Integer.parseInt(input);
-		if (regNum < 0) throw new NullPointerException();
+		var regNum = (int) Double.parseDouble(input);
+		if (regNum < 0) throw new NumberFormatException();
 		return regNum;
 	}
 
@@ -84,6 +162,16 @@ public abstract class ExcelParserBase<T> {
 		try {
 			String input = parser(cell);
 			String[] res = input.split(",");
+			var phonePrefix = "";
+			for (var i = 0; i < res.length; i++) {
+				Matcher phonePrefixMatcher = phonePrefixPattern.matcher(res[i]);
+				if (phonePrefixMatcher.find() && phonePrefix.equals("")) {
+					phonePrefix = phonePrefixMatcher.group();
+				}
+				if (!res[i].matches(phonesPattern)) {
+					res[i] = phonePrefix + res[i].trim();
+				}
+			}
 			return Arrays.stream(res).map(String::trim).toArray(String[]::new);
 		} catch (NullPointerException e) {
 			return new String[]{};
@@ -149,9 +237,10 @@ public abstract class ExcelParserBase<T> {
 					res.append(cell.getStringCellValue());
 					break;
 				case NUMERIC:
-				case FORMULA:
 					res.append(cell.getNumericCellValue());
 					break;
+				case FORMULA:
+					res.append(cell.getCellFormula());
 				default:
 					break;
 			}

@@ -48,7 +48,7 @@ public class ExcelController {
 	@RequestMapping(value = "/download/own", method = RequestMethod.POST)
 	public ResponseEntity<?> downloadByOwnOperator(@RequestBody ListResponse<String> listResponse) {
 		try {
-			return download(excelService.dowloadByOwnOperator(listResponse));
+			return download(excelService.downloadByOwnOperator(listResponse));
 		} catch (Exception e) {
 			return new ResponseEntity<>("error id load", null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}

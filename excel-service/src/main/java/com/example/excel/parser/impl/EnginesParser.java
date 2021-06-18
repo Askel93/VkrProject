@@ -50,7 +50,7 @@ public class EnginesParser extends ExcelParserBase<List<Engine>> {
 		int sumPwr = 0;
 		for (int i = 0; i < engines.size(); i++) {
 			parseEngine(row, i, engines.get(i));
-			sumPwr += engines.get(i) == null ? 0 : engines.get(i).getPwr();
+			sumPwr += engines.get(i) == null ? 0 : engines.get(i).getPwr() * engines.get(i).getCount();
 		}
 
 		parser(row.createCell(ENGINE_INDEX[3]), sumPwr);
