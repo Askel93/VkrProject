@@ -7,7 +7,6 @@ import com.example.ship.service.ShipService;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,12 +23,7 @@ public class ExcelController {
 
 	@PreAuthorize("#oauth2.hasScope('server')")
 	@JsonView(View.UI.class)
-	@RequestMapping(
-			value = "/toExcel",
-			method = RequestMethod.POST,
-			consumes = MediaType.APPLICATION_JSON_VALUE,
-			produces = MediaType.APPLICATION_JSON_VALUE
-	)
+	@RequestMapping(value = "/toExcel", method = RequestMethod.POST)
 	@ResponseBody
 	public List<ShipResponse> getAllById(@RequestBody ListResponse<Integer> listResponse) {
 		log.info("get ships to excel");

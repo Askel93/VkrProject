@@ -38,6 +38,33 @@ public class ShipResponse {
 	private ShipDimensions shipDimensions;
 
 	public static ShipResponse toResponse(Ship ship) {
+		var shipResponse = ShipResponse.builder()
+				.id(ship.getId())
+				.name(ship.getName())
+				.type(ship.getType())
+				.subType(ship.getSubType())
+				.imo(ship.getImo())
+				.callSign(ship.getCallSign())
+				.project(ship.getProject())
+				.port(ship.getPort())
+				.speed(ship.getSpeed())
+				.godP(ship.getGodP())
+				.shipEngine(ship.getShipEngine())
+				.shipCapacity(ship.getShipCapacity())
+				.shipDimensions(ship.getShipDimensions())
+				.build();
+		if (!ship.isEmptyOwn()) {
+			shipResponse.setOwn(ship.getOwn());
+			shipResponse.setOwnName(ship.getOwnName());
+		}
+		if (!ship.isEmptyOperator()) {
+			shipResponse.setOperator(ship.getOperator());
+			shipResponse.setOperatorName(ship.getOperatorName());
+		}
+		return shipResponse;
+	}
+
+	public static ShipResponse toListResponse(Ship ship) {
 		return ShipResponse.builder()
 				.id(ship.getId())
 				.name(ship.getName())
@@ -49,13 +76,6 @@ public class ShipResponse {
 				.port(ship.getPort())
 				.speed(ship.getSpeed())
 				.godP(ship.getGodP())
-				.ownName(ship.getOwnName())
-				.own(ship.getOwn())
-				.operatorName(ship.getOperatorName())
-				.operator(ship.getOperator())
-				.shipEngine(ship.getShipEngine())
-				.shipCapacity(ship.getShipCapacity())
-				.shipDimensions(ship.getShipDimensions())
 				.build();
 	}
 }

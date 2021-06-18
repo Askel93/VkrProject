@@ -29,7 +29,7 @@ public class BaseController<T, ID> {
         return ResponseEntity.ok().body(service.findById(id));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @JsonView(View.UI.class)
     public ResponseEntity<?> deleteById(@PathVariable("id") ID id) {

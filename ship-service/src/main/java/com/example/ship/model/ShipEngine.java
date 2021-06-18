@@ -1,13 +1,27 @@
 package com.example.ship.model;
 
 import com.example.ship.config.View;
+import com.example.ship.response.EnginesFilter;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@SuppressWarnings("unused")
+@SqlResultSetMapping(name = "enginesFilterResult", classes = {
+		@ConstructorResult(
+				targetClass = EnginesFilter.class,
+				columns = {
+						@ColumnResult(name = "minPwr", type = Integer.class),
+						@ColumnResult(name = "maxPwr", type = Integer.class),
+				})
+})
+@NamedNativeQuery(
+		name = "enginesFilter",
+		query = "Select min(e.sum_pwr) as minPwr, max(e.sum_pwr) as maxPwr " +
+				"from ship_engine e",
+		resultSetMapping = "enginesFilterResult"
+)
 @Entity
 @Table(name = "ship_engine")
 @Data
@@ -23,46 +37,18 @@ public class ShipEngine {
 	@JoinColumn(name = "reg_num", referencedColumnName = "reg_num")
 	private Ship ship;
 
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "eng_1", referencedColumnName = "id", updatable = false, columnDefinition = "uuid")
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name = "eng_1", referencedColumnName = "id", columnDefinition = "uuid")
 	private Engine engine1;
 
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "eng_2", referencedColumnName = "id", updatable = false, columnDefinition = "uuid")
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name = "eng_2", referencedColumnName = "id", columnDefinition = "uuid")
 	private Engine engine2;
 
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "eng_3", referencedColumnName = "id", updatable   = false, columnDefinition = "uuid")
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "eng_3", referencedColumnName = "id", columnDefinition = "uuid")
 	private Engine engine3;
 
 	@Column(name = "sum_pwr")
 	private int sumPwr;
-
-	public ShipEngine(Ship ship, Engine engine1, Engine engine2, Engine engine3) {
-		this.regNum = ship.getId();
-		this.ship = ship;
-		this.engine1 = engine1;
-		this.engine2 = engine2;
-		this.engine3 = engine3;
-		sumPwr();
-	}
-
-	private void sumPwr() {
-		this.sumPwr = engine1 == null ? 0 : engine1.getPwr() * engine1.getCount();
-		this.sumPwr += engine2 == null ? 0 : engine2.getPwr() * engine2.getCount();
-		this.sumPwr += engine3 == null ? 0 : engine3.getPwr() * engine3.getCount();
-	}
-
-	private void setEngine1(Engine engine1) {
-		this.engine1 = engine1;
-		sumPwr();
-	}
-	private void setEngine2(Engine engine2) {
-		this.engine2 = engine2;
-		sumPwr();
-	}
-	private void setEngine3(Engine engine3) {
-		this.engine3 = engine3;
-		sumPwr();
-	}
 }

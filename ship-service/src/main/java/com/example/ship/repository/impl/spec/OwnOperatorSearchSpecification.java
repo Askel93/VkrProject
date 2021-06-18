@@ -19,10 +19,11 @@ public class OwnOperatorSearchSpecification implements Specification<OwnOperator
 
 	@Override
 	public Predicate toPredicate(Root<OwnOperator> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-		if (criteria.getSearchText().trim().equals("")) {
+		var searchText = criteria.getSearchText();
+		if (searchText == null || searchText.trim().equals("")) {
 			return null;
 		}
-		var searchText = "%" + criteria.getSearchText().toUpperCase().trim() + "%";
+		searchText = "%" + searchText.toUpperCase().trim() + "%";
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(builder.like(builder.upper(root.get("name")), searchText));
 		predicates.add(builder.like(builder.upper(root.get("address")), searchText));

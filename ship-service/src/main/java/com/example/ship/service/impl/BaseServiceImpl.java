@@ -4,6 +4,7 @@ import com.example.ship.exception.ResourceNotFoundException;
 import com.example.ship.repository.BaseRepository;
 import com.example.ship.service.BaseService;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
     }
 
     @Override
+    @Transactional
     public void deleteById(ID id) {
         try {
             baseRepository.deleteById(id);

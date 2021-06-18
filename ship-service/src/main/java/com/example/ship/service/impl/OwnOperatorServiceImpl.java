@@ -1,8 +1,10 @@
 package com.example.ship.service.impl;
 
+import com.example.ship.exception.ResourceNotFoundException;
 import com.example.ship.model.OwnOperator;
 import com.example.ship.repository.OwnOperatorRepository;
 import com.example.ship.service.OwnOperatorService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,6 +20,12 @@ public class OwnOperatorServiceImpl extends BaseServiceImpl<OwnOperator, String>
 	public OwnOperatorServiceImpl(OwnOperatorRepository repository) {
 		super(repository);
 		this.repository = repository;
+	}
+
+	@Override
+	@Cacheable(value = "ownOperators", key = "#name")
+	public OwnOperator findById(String name) throws ResourceNotFoundException {
+		return super.findById(name);
 	}
 
 	@Override

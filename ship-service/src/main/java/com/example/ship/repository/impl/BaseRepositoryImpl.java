@@ -1,8 +1,6 @@
 package com.example.ship.repository.impl;
 
 import com.example.ship.repository.BaseRepository;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
@@ -27,15 +25,6 @@ public class BaseRepositoryImpl<T, ID extends Serializable>
         this.entityInformation = entityInformation;
     }
 
-    @Override
-    @Transactional(noRollbackFor = { DataIntegrityViolationException.class, ConstraintViolationException.class })
-    public <S extends T> S save(S entity) {
-//        if (entityInformation.isNew(entity)) {
-            em.persist(entity);
-//            em.flush();
-//        }
-        return entity;
-    }
 
     @Override
     @Transactional
@@ -46,7 +35,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable>
         int i = 0;
 
         for (S entity : entities) {
-            if ((i > 0 && i % 20 == 0) || !entities.iterator().hasNext()) {
+            if ((i > 0 && i % 40 == 0) || !entities.iterator().hasNext()) {
                 try {
                     em.flush();
                     em.clear();

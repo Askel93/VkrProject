@@ -3,12 +3,12 @@ package com.example.ship.controller;
 import com.example.ship.config.View;
 import com.example.ship.exception.ResourceNotFoundException;
 import com.example.ship.model.Ship;
+import com.example.ship.response.Filters;
 import com.example.ship.response.ListResponse;
 import com.example.ship.response.ShipResponse;
 import com.example.ship.service.ShipService;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -53,17 +53,23 @@ public class ShipController extends BaseController<Ship, Integer> {
     public ResponseEntity<?> getShipsWithSort(@RequestParam(value = "page", required = false, defaultValue = "1") int page,
                                               @RequestParam(value = "size", required = false, defaultValue = "20") int size,
                                               @RequestParam(value = "sort", required = false, defaultValue = "id") String sort,
-                                              @RequestParam(value = "search", required = false, defaultValue = "") String searchText) {
-        log.info("fetch page {} with size {} and sort {}", page, size, sort);
-        return ResponseEntity.ok(service.findPage(page - 1, size, sort, searchText));
+                                              @RequestParam(value = "search", required = false, defaultValue = "") String searchText,
+                                              Filters filters) {
+        return ResponseEntity.ok(
+            service
+                .findPage(page - 1, size, sort, searchText, filters)
+                .stream()
+                .map(ShipResponse::toListResponse)
+                .collect(Collectors.toList())
+        );
     }
 
     @GetMapping("/count")
     public ResponseEntity<?> getCountPage(
         @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-        @RequestParam(value = "search", required = false, defaultValue = "") String searchText) {
-        log.info("get count page");
-        return ResponseEntity.ok(service.getCountPage(size, searchText));
+        @RequestParam(value = "search", required = false, defaultValue = "") String searchText,
+        Filters filters) {
+        return ResponseEntity.ok(service.getCountPage(size, searchText, filters));
     }
 
     @DeleteMapping("/all")

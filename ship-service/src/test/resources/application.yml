@@ -1,3 +1,5 @@
 spring:
-  datasource.driver-class-name: org.postgresql.Driver
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
   jpa.hibernate.ddl-auto: create-drop

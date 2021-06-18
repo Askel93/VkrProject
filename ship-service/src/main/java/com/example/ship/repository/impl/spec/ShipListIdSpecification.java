@@ -1,14 +1,12 @@
 package com.example.ship.repository.impl.spec;
 
 import com.example.ship.model.Ship;
+import com.example.ship.model.ShipEngine;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +34,14 @@ public class ShipListIdSpecification implements Specification<Ship> {
 			}
 		}
 		if (withFetch) {
+			root.fetch("own", JoinType.LEFT);
+			root.fetch("operator", JoinType.LEFT);
 			root.fetch("shipCapacity");
 			root.fetch("shipDimensions");
-			root.fetch("shipEngine");
-			root.fetch("own");
-			root.fetch("operator");
+			Fetch<Ship, ShipEngine> engineFetch = root.fetch("shipEngine", JoinType.LEFT);
+			engineFetch.fetch("engine1", JoinType.LEFT);
+			engineFetch.fetch("engine2", JoinType.LEFT);
+			engineFetch.fetch("engine3", JoinType.LEFT);
 		}
 		return builder.or(predicates.toArray(new Predicate[] {}));
 	}

@@ -29,6 +29,6 @@ public class Engine {
 	private int count;
 	@Column(name = "eng_pwr")
 	private int pwr;
-	@Column(name = "dvig", columnDefinition = "text")
+	@Column(name = "dvig")
 	private String dvig;
 }

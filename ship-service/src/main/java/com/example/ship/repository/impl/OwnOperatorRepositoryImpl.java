@@ -15,16 +15,32 @@ import java.util.List;
 
 @SuppressWarnings("NullableProblems")
 @Repository
+@Transactional(readOnly = true)
 public class OwnOperatorRepositoryImpl extends BaseRepositoryImpl<OwnOperator, String> implements OwnOperatorRepository {
 
 	public static final String INSERT_QUERY = "INSERT INTO own_operator (name, address, phones, email, fax) " +
 			"VALUES (:name, :address, CAST(STRING_TO_ARRAY(:phones, ',') as TEXT[]), :email, CAST(STRING_TO_ARRAY(:fax, ',') as TEXT[])) " +
 			"ON CONFLICT DO NOTHING";
+	private static final String UPDATE_SHIP_ON_RM_OWN = "UPDATE Ship s set s.ownName = NULL where s.ownName = :ownName ";
+	private static final String UPDATE_SHIP_ON_RM_OPERATOR = "UPDATE Ship s set s.operatorName = NULL where s.operatorName = :operatorName ";
 
 	public OwnOperatorRepositoryImpl(EntityManager entityManager) {
 		super(JpaEntityInformationSupport.getEntityInformation(OwnOperator.class, entityManager), entityManager);
 	}
 
+	@Override
+	@Transactional
+	public void deleteById(String name) {
+		OwnOperator deleteOwnOperator = em.find(OwnOperator.class, name);
+		em.createQuery(UPDATE_SHIP_ON_RM_OWN)
+				.setParameter("ownName", deleteOwnOperator.getName())
+				.executeUpdate();
+		em.createQuery(UPDATE_SHIP_ON_RM_OPERATOR)
+				.setParameter("operatorName", deleteOwnOperator.getName())
+				.executeUpdate();
+
+		super.delete(deleteOwnOperator);
+	}
 
 	@Override
 	@Transactional
@@ -46,14 +62,12 @@ public class OwnOperatorRepositoryImpl extends BaseRepositoryImpl<OwnOperator, S
 	}
 
 	@Override
-	@Transactional
 	public List<OwnOperator> findAllWithSearch(Pageable pageable, String searchText) {
 		OwnOperatorSearchSpecification spec = new OwnOperatorSearchSpecification(new SearchCriteria(searchText));
 		return super.findAll(spec, pageable).getContent();
 	}
 
 	@Override
-	@Transactional
 	public long getCount(String searchText) {
 		OwnOperatorSearchSpecification spec = new OwnOperatorSearchSpecification(new SearchCriteria(searchText));
 		return super.count(spec);

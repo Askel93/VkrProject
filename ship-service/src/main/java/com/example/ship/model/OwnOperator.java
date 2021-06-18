@@ -14,7 +14,7 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import java.util.List;
 
-@BatchSize(size = 20)
+@BatchSize(size = 40)
 @Entity
 @Table(name = "own_operator", uniqueConstraints=@UniqueConstraint(columnNames = {"name"}))
 @Data
@@ -25,16 +25,14 @@ import java.util.List;
 public class OwnOperator {
 
     @Id
-    @Column(name = "name", columnDefinition="text", unique = true)
+    @Column(name = "name", unique = true)
     private String name;
 
-    @Column(name = "address", columnDefinition = "text")
     private String address;
     @Column(name = "phones", columnDefinition = "text[]")
     @Type(type = "string-array")
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     private String[] phones;
-    @Column(name = "email", columnDefinition = "text")
     private String email;
     @Column(name = "fax", columnDefinition = "text[]")
     @Type(type = "string-array")

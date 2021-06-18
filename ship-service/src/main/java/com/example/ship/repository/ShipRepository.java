@@ -1,6 +1,7 @@
 package com.example.ship.repository;
 
 import com.example.ship.model.Ship;
+import com.example.ship.response.Filters;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -20,7 +21,7 @@ public interface ShipRepository extends BaseRepository<Ship, Integer> {
 
 	List<Ship> findAllByOwnOperator(List<String> listId);
 
-	long getCount(String searchText);
+	long getCount(String searchText, Filters filters);
 
-	List<Ship> findAllWithSearch(Pageable pageable, String searchText);
+	List<Ship> findAllWithSearch(Pageable pageable, String searchText, Filters filters);
 }
