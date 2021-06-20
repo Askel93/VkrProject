@@ -1,0 +1,15 @@
+info:
+  component: Turbine
+  description: Turbine Stream service
+
+turbine:
+  aggregator:
+    cluster-config: default
+  appConfig: account-service, excel-service, ship-service
+  clusterNameExpression: new String("default")
+  combine-host-port: true
+  instanceUrlSuffix.default: actuator/hystrix.stream
+
+eureka.client:
+  register-with-eureka: false
+  fetch-registry: false

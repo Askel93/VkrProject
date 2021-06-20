@@ -15,16 +15,6 @@ server:
 info:
   component: ship-service
 
-eureka:
-  instance:
-    leaseRenewalIntervalInSeconds: 5
-    leaseExpirationDurationInSeconds: 1
-    metadataMap:
-      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-    instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
-    statusPageUrlPath: ${server.servlet.context-path}/info
-    healthCheckUrlPath: ${server.servlet.context-path}/health
-
 spring:
   main:
     allow-bean-definition-overriding: true
@@ -65,5 +55,5 @@ feign:
 logging:
   level:
     org.hibernate:
-       SQL: DEBUG
+      SQL: DEBUG
   # persister.entity: ERROR
