@@ -1,4 +1,4 @@
-import { ExcelAction, ListResponse } from '../types'
+import { ExcelAction, SaveToExcelPayload } from '../types'
 
 const saveToDbRequest = (formData: FormData): ExcelAction => ({
   type: 'SAVE_TO_DB',
@@ -9,23 +9,28 @@ const saveToDbSuccess = (err: string): ExcelAction => ({
   payload: err
 });
 
-const saveToExcelRequest = (data: ListResponse): ExcelAction => ({
+const saveToExcelRequest = (data: SaveToExcelPayload): ExcelAction => ({
   type: 'SAVE_TO_EXCEL',
   payload: data
 });
 const saveToExcelSuccess = (): ExcelAction => ({
   type: 'SAVE_TO_EXCEL_SUCCESS'
 });
+const saveToExcelByOwn = (data: SaveToExcelPayload): ExcelAction => ({
+  type: 'SAVE_TO_EXCEL_BY_OWN',
+  payload: data
+});
 
 const excelFailure = (err: string): ExcelAction => ({
   type: 'EXCEL_FAILURE',
   payload: err
-})
+});
 
 export {
   saveToDbRequest,
   saveToDbSuccess,
   saveToExcelRequest,
   saveToExcelSuccess,
+  saveToExcelByOwn,
   excelFailure
 }

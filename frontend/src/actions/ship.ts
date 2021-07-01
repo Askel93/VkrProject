@@ -1,17 +1,20 @@
-import { DeleteResponse, FetchPayload, Ship, ShipAction } from '../types';
+import { FetchPayload, Ship, ShipAction, DeleteResponse } from '../types';
 
 const fetchShipsRequest = (data: FetchPayload): ShipAction => ({
   type: 'FETCH_SHIPS',
   payload: data
 });
-const fetchShipsSuccess = (data: Ship[]): ShipAction => ({
-  type: 'FETCH_SHIPS_SUCCESS',
-  payload: data
-});
+const fetchShipsSuccess = (data: Ship[], fetchPayload: FetchPayload): ShipAction => {
+  sessionStorage.setItem("ships", JSON.stringify({ ships: data, fetchPayload }))
+  return {
+    type: 'FETCH_SHIPS_SUCCESS',
+    payload: data
+  };
+}
 
-const getCountPage = (size: number): ShipAction => ({
+const getCountPage = (data: FetchPayload): ShipAction => ({
   type: 'GET_COUNT_PAGE',
-  payload: size
+  payload: data
 });
 const getCountPageSuccess = (count: number): ShipAction => ({
   type: 'GET_COUNT_PAGE_SUCCESS',
@@ -30,9 +33,9 @@ const updateShipRequest = (ship: Ship): ShipAction => ({
   type: 'UPDATE_SHIP',
   payload: ship
 })
-const updateShipSuccess = (id: number): ShipAction => ({
+const updateShipSuccess = (data: FetchPayload): ShipAction => ({
   type: 'UPDATE_SHIP_SUCCESS',
-  payload: id,
+  payload: data,
 })
 
 const fetchShipRequest = (id: number): ShipAction => ({
@@ -48,8 +51,12 @@ const deleteShips = (data: DeleteResponse): ShipAction => ({
   type: 'DELETE_SHIPS',
   payload: data
 });
+const deleteShip = (data: DeleteResponse): ShipAction => ({
+  type: 'DELETE_SHIP',
+  payload: data
+})
 const deleteShipsSuccess = (data: FetchPayload): ShipAction => ({
-  type: 'DELETE_SHIPS_SUCCESS',
+  type: 'DELETE_SHIP_SUCCESS',
   payload: data
 });
 
@@ -72,5 +79,6 @@ export {
   fetchShipSuccess,
   deleteShips,
   deleteShipsSuccess,
+  deleteShip,
   shipFailure,
 }

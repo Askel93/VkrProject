@@ -2,14 +2,15 @@ import { history } from '../store';
 import { urlConstants } from '../types';
 const LOGIN_URL = urlConstants.LOGIN_URL;
 
-const historyPush = (path: string) => {
-  history.push(path);
+const noAuthRequest = () => {
+  localStorage.clear();
+  sessionStorage.clear();
+  historyPush(LOGIN_URL)
 }
 
-const noAuthRequest = () => {
-  localStorage.removeItem("token");
-  sessionStorage.clear();
-  history.push(LOGIN_URL);
+const historyPush = (path: string, state?: any) => {
+  const { pathname, search } = history.location;
+  history.push(path, { ...state, prevPath: pathname + search });
 }
 
 const historyGoBack = () => {

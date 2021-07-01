@@ -13,13 +13,17 @@ const jwtSetToken = (token: TokenObject): JWTActions => ({
   type: 'SET_TOKEN',
   payload: token
 });
-const jwtSetTokenSuccess = (token: TokenObject): JWTActions => ({
+const jwtSetTokenSuccess = (token?: TokenObject): JWTActions => ({
   type: 'SET_TOKEN_SUCCESS',
   payload: token
 })
+
 const jwtRemoveToken = (): JWTActions => ({
   type: 'REMOVE_TOKEN'
 });
+const jwtRemoveTokenSuccess = (): JWTActions => ({
+  type: 'REMOVE_TOKEN_SUCCESS',
+})
 
 export {
   refreshSuccess,
@@ -27,4 +31,5 @@ export {
   jwtSetToken,
   jwtSetTokenSuccess,
   jwtRemoveToken,
+  jwtRemoveTokenSuccess
 }

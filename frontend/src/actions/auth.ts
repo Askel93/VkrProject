@@ -1,32 +1,26 @@
 import {LoginUser, User, TokenObject, AuthActions} from '../types';
 
 //login
-const loginRequest = (loginUser : LoginUser): AuthActions => ({
+const loginRequest = (loginUser : LoginUser, prevPath?: string): AuthActions => ({
   type: 'LOGIN',
-  payload: loginUser
+  payload: loginUser,
+  prevPath
 });
-const loginSuccess = (token : TokenObject): AuthActions => ({
+const loginSuccess = (token : TokenObject, prevPath?: string): AuthActions => ({
   type: 'LOGIN_SUCCESS',
-  payload: token
+  payload: token,
+  prevPath
 });
 
 //signUp
-const signUpRequest = (newUser : User): AuthActions => ({
+const signUpRequest = (newUser : User, prevPath?: string): AuthActions => ({
   type: 'SIGN_UP',
-  payload: newUser
+  payload: newUser,
+  prevPath
 });
 const signUpSuccess = (loginUser : LoginUser): AuthActions => ({
   type: 'SIGN_UP_SUCCESS',
   payload: loginUser
-});
-
-//logout
-const logoutRequest = (data : TokenObject): AuthActions => ({
-  type: 'LOGOUT',
-  payload: data
-});
-const logoutSuccess = (): AuthActions => ({
-  type: 'LOGOUT_SUCCESS',
 });
 
 const authFailure = (err: string): AuthActions => ({
@@ -37,8 +31,6 @@ const authFailure = (err: string): AuthActions => ({
 export {
   loginRequest,
   loginSuccess,
-  logoutRequest,
-  logoutSuccess,
   signUpRequest,
   signUpSuccess,
   authFailure,
