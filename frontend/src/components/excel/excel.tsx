@@ -1,25 +1,29 @@
 import React, { useState } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
+import { Button, ButtonGroup, Form, Modal } from 'react-bootstrap';
 
 import { saveToDbRequest } from '../../actions/excel';
+import { WithAuthFunc } from '../hoc/with';
 
 const Excel = () => {
+
   const [show, setShow] = useState(false)
-  
-  const handleClose = () => setShow(false);
-  const handleOpen = () => setShow(true);
   const [file, setFile] = useState<File | null>(null);
+
+  const [handleOpen] = WithAuthFunc(() => setShow(true));
+  const handleClose = () => setShow(false);
 
   const dispatch = useDispatch();
 
-  const saveToDb = () => {
+  const saveToDb = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     let formData = new FormData();
     if (file === null) {
       return;
     }
     formData.append("file", file, file.name)
     dispatch(saveToDbRequest(formData));
+    setFile(null);
     handleClose();
   }
 
@@ -35,7 +39,7 @@ const Excel = () => {
 
   return (
     <>
-      <Button onClick={handleOpen}>
+      <Button onClick={handleOpen} variant="link" className="m-0 p-0">
         Загрузить файл
       </Button>
       <Modal show={show} onHide={handleClose}>
@@ -43,20 +47,23 @@ const Excel = () => {
           <Modal.Title>Загрузка excel в базу данных</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.File id="form-excel">
-              <Form.File.Input onChange={handleFileChange}/>
+          <Form onSubmit={saveToDb}>
+            <Form.File id="formcheck" onChange={handleFileChange} custom>
+              <Form.File.Input onChange={handleFileChange} />
+              <Form.File.Label data-browse="Browser">
+                {file ? file.name : "Custom file input"}
+              </Form.File.Label>
             </Form.File>
+            <ButtonGroup className="mt-2">
+              <Button variant="secondary" onClick={handleClose}>
+                Close
+              </Button>
+              <Button variant="primary" type="submit">
+                Save Changes
+              </Button>
+            </ButtonGroup>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={saveToDb}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
       </Modal>
     </>
   )
