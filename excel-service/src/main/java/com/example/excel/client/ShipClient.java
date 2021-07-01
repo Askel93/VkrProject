@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@FeignClient(name = "ship-service")
+@FeignClient(name = "ship-service", fallbackFactory = ShipClientFallback.class)
 public interface ShipClient {
 
 	@RequestMapping(value = "/ship/toExcel", method = RequestMethod.POST)
