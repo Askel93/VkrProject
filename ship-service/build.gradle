@@ -31,16 +31,16 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-	implementation 'junit:junit:4.12'
 	runtimeOnly 'org.postgresql:postgresql'
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
-	implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'de.codecentric:spring-boot-admin-starter-client'
 
+	implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
 
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache', version: '2.5.0'
 
@@ -50,11 +50,20 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	compile group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '1.0.0'
 
-	testImplementation group: 'junit', name: 'junit', version: '4.4'
+	testCompile 'org.junit.jupiter:junit-jupiter-api:5.3.0'
+	testCompile 'org.junit.jupiter:junit-jupiter-params:5.3.0'
+	testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.3.0'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	testCompile "org.testcontainers:testcontainers:1.14.1"
+	testImplementation 'org.testcontainers:postgresql:1.14.1'
+	testImplementation 'org.junit.platform:junit-platform-runner'
+
+	testImplementation group: 'org.apache.activemq.tooling', name: 'activemq-junit', version: '5.13.1'
+	implementation group: 'org.apache.activemq', name: 'activemq-broker', version: '5.13.1'
 }
 
 dependencyManagement {
@@ -69,5 +78,6 @@ bootJar {
 }
 
 test {
+	jvmArgs '--enable-preview'
 	useJUnitPlatform()
 }
