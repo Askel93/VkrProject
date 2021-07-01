@@ -1,20 +1,17 @@
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { Row } from 'react-bootstrap';
 
-import Item from '../cardItem';
-import { Ship } from '../../../types';
+import { ShipList } from '../../types';
+import Item from './item';
 
-import './List.css'
-
-export interface CardListProps {
-  ships: Ship[];
-}
-
-
-const CardList: FunctionComponent<CardListProps> = ({ ships }) => {
+const CardList: ShipList = ({
+  entities,
+  isChecked = () => false,
+  onChecked = () => { }
+}) => {
   return (
     <Row className="card-list">
-      {ships.map((ship) => <Item key={ship.id} ship={ship} />)}
+      {entities.map((ship) => <Item key={ship.id} entity={ship} checked={isChecked(ship.id)} onChecked={onChecked} />)}
     </Row>
   )
 }

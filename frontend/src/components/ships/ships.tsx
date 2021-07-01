@@ -1,52 +1,59 @@
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Alert } from 'react-bootstrap';
 
-import { getCountPage, historyPush, fetchShipsRequest } from '../../actions';
-import { shipSelector} from '../../selector';
+import { fetchShipsRequest, getCountPage } from '../../actions/ship';
+import { historyPush } from '../../actions/util';
+import { shipsOfflineSelector } from '../../selector';
+import Panel from './panel';
+import { PagePanel } from '../util/btn'
 
-import TableList from './tableList';
-import CardList from './cardList';
-import Panel from './sortpanel';
-import { FetchPayload } from '../../types';
-import { Loading, PagePanel } from '../util';
+import { ShipsType } from '../types';
+import { useListId } from '../hoc/hoc';
 
-const Ships: FunctionComponent<FetchPayload> = ({page, size, sort = "id"}) => {
+import Loading from '../util/spinner';
+import { ShipSortParam } from '../../types';
 
-  let { count, ships, loading } = useSelector(shipSelector);
+const TableList = lazy(() => import('./tableList'));
+const CardList = lazy(() => import('./cardList'));
 
-  const [shipList, setShipList] = useState<number[]>([]);
+const Ships: ShipsType = ({ page, size, sort = "id", search }) => {
 
+  const { listId, ...other } = useListId();
+  let { countPage, ships } = useSelector(shipsOfflineSelector({ page, size, sort: sort as ShipSortParam, search }));
   //true - table, false - card
   const [typeList, setTypeList] = useState(true);
 
   const dispatch = useDispatch();
-  
-  const onChecked = (i: number) => {
-    if (isChecked(i)) {
-      const id = shipList.indexOf(i);
-      const newShipList = [...shipList.slice(0, id), ...shipList.slice(id + 1)]
-      setShipList(newShipList);
-      return;
+
+  useEffect(() => {
+    dispatch(getCountPage({ size, page, search }));
+    // eslint-disable-next-line
+  }, [size, search]);
+
+  useEffect(() => {
+    dispatch(fetchShipsRequest({ page, size, sort, search }))
+    // eslint-disable-next-line
+  }, [page, size, sort, search])
+
+  const onPageClick = (i: number) => {
+    const url = `/ships/${i}/${size}/${sort}` + search;
+    historyPush(url);
+  }
+  const onSearch = (searchText: string) => {
+    let param = search === "" ? "?" : search
+    if (searchText.trim() === "") {
+      param = param.replace(new RegExp("search=\\D*&?"), "")
+    } else {
+      if (param.includes("search=")) {
+        param = param.replace(new RegExp("search=\\D*&?"), `search=${searchText}`)
+      } else {
+        param = param + "search=" + searchText;
+      }
     }
-    setShipList([...shipList, i])
+    const url = `/ships/1/${size}/${sort}` + param;
+    historyPush(url);
   }
-
-  const isChecked = (i: number) => {
-    return shipList.includes(i);
-  }
-
-  useEffect(() => {
-    dispatch(getCountPage(size));
-  }, [size]);
-
-  useEffect(() => {
-    dispatch(fetchShipsRequest({page, size, sort}))
-  }, [page, size, sort])
-
-  const onItemClick = (i: number) => {
-    historyPush(`/ship/${i}/${size}/${sort}`);
-  }
-
   return (
     <>
       <Panel
@@ -55,19 +62,20 @@ const Ships: FunctionComponent<FetchPayload> = ({page, size, sort = "id"}) => {
         page={page}
         typeList={typeList}
         setTypeList={setTypeList}
-        shipList={shipList} />
-      {loading
-      ? <Loading />
-      : typeList 
-        ? <TableList
-            ships={ships}
-            onChecked={onChecked}
-            isChecked={isChecked} />
-        : <CardList
-            ships={ships} />}
-      {count <= 1 ? null : <PagePanel count={count} page={page} onItemClick={onItemClick} />}
+        listId={listId}
+        onSearch={onSearch}
+        search={search}
+        onDeleteClick={other.deleteAll} />
+      <React.Suspense fallback={<Loading />}>
+        {ships.length === 0
+          ? <Alert className="list text-center" variant="secondary">Пусто</Alert>
+          : typeList
+            ? <TableList entities={ships} {...other} />
+            : <CardList entities={ships} {...other} />}
+      </React.Suspense>
+      {countPage <= 1 ? null : <PagePanel count={countPage} page={page} onItemClick={onPageClick} />}
     </>
   );
 }
 
-export default Ships;
+export default React.memo(Ships, (prev, next) => prev.page === next.page && prev.size === next.size && prev.sort === next.sort && prev.search === next.search);

@@ -1,40 +1,41 @@
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { Table } from 'react-bootstrap'
 
+import { ShipList } from '../../types';
 import Item from './item';
 
-import { Ship } from '../../../types';
-
-import './List.css'
-
-export interface TableListProps {
-  ships: Ship[];
-  withChecked?: boolean;
-  onChecked?: (i: number) => void;
-  isChecked?: (i: number) => boolean;
-}
-
-const TableList: FunctionComponent<TableListProps> = ({ 
-  onChecked = () => {},
-  isChecked = () => false, 
-  ships,
+const TableList: ShipList = ({
+  onChecked = () => { },
+  isChecked = () => false,
+  entities,
   withChecked = true,
+  onAllClick = () => { },
+  isAllChecked = () => false
 }) => {
+  const handleAllClick = () => onAllClick(entities.map(i => i.id));
+  const allChecked = () => isAllChecked(entities.map(i => i.id));
 
-  return  (
-    <Table className="table-list">
-      <thead>
-        <tr>
-          {withChecked ? <th>#</th> : null}
-          <th>Номер</th>
-          <th>Название</th>
-          <th>Тип</th>
-        </tr>
-      </thead>
-      <tbody>
-        {ships.map((ship) => <Item withChecked={withChecked} key={ship.id} ship={ship} onChecked={onChecked} checked={isChecked(ship.id)} />)}
-      </tbody>
-    </Table>
+  return (
+    <div className="list">
+      <Table className="table-list m-0">
+        <thead>
+          <tr>
+            {withChecked
+              ? <th className="check-ship">
+                <input type="checkbox" onChange={handleAllClick} checked={allChecked()} />
+              </th>
+              : null}
+            <th>Номер</th>
+            <th>Название</th>
+            <th>Тип</th>
+            <th/>
+          </tr>
+        </thead>
+        <tbody>
+          {entities.map((ship) => <Item withChecked={withChecked} key={ship.id} entity={ship} onChecked={onChecked} checked={isChecked(ship.id)} />)}
+        </tbody>
+      </Table>
+    </div>
   );
 }
 
