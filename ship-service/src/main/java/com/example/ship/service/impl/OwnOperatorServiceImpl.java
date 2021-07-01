@@ -3,6 +3,7 @@ package com.example.ship.service.impl;
 import com.example.ship.exception.ResourceNotFoundException;
 import com.example.ship.model.OwnOperator;
 import com.example.ship.repository.OwnOperatorRepository;
+import com.example.ship.service.JmsService;
 import com.example.ship.service.OwnOperatorService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class OwnOperatorServiceImpl extends BaseServiceImpl<OwnOperator, String> implements OwnOperatorService {
+public class OwnOperatorServiceImpl
+		extends BaseServiceImpl<OwnOperator, String>
+		implements OwnOperatorService, JmsService<OwnOperator> {
 
 	private final OwnOperatorRepository repository;
 
@@ -48,5 +51,10 @@ public class OwnOperatorServiceImpl extends BaseServiceImpl<OwnOperator, String>
 	@Override
 	public void deleteAllById(List<String> listId) {
 		repository.deleteAllById(listId);
+	}
+
+	@Override
+	public <S extends OwnOperator> List<S> saveAll(List<S> ownOperators) {
+		return repository.saveAll(ownOperators);
 	}
 }

@@ -15,15 +15,14 @@ import java.util.List;
 @AllArgsConstructor
 public class OwnOperatorSearchSpecification implements Specification<OwnOperator> {
 
-	private final SearchCriteria criteria;
+	private final String searchText;
 
 	@Override
 	public Predicate toPredicate(Root<OwnOperator> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-		var searchText = criteria.getSearchText();
 		if (searchText == null || searchText.trim().equals("")) {
 			return null;
 		}
-		searchText = "%" + searchText.toUpperCase().trim() + "%";
+		var searchText = "%" + this.searchText.toUpperCase().trim() + "%";
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(builder.like(builder.upper(root.get("name")), searchText));
 		predicates.add(builder.like(builder.upper(root.get("address")), searchText));

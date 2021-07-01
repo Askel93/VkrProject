@@ -18,15 +18,12 @@ public interface ShipService extends BaseService<Ship, Integer> {
 			put = @CachePut(value = "ships", key = "#ship.id"),
 			evict = {
 					@CacheEvict(value = "filters", allEntries = true),
-					@CacheEvict(value = "ownOperators", key = "#ship.ownName")
+					@CacheEvict(value = "ownOperators", key = "#ship.ownName", condition = "#ship.ownName!=null"),
+					@CacheEvict(value = "ownOperators", key = "#ship.operatorName", condition = "#ship.operatorName!=null")
 			}
 	)
 	Ship update(Ship ship);
 
 	@CacheEvict(value = {"ships", "ownOperators", "filters"}, allEntries = true)
 	void deleteAllById(List<Integer> listId);
-
-	List<Ship> getAllById(List<Integer> listId);
-
-	List<Ship> getAllByOwnOperator(List<String> listId);
 }

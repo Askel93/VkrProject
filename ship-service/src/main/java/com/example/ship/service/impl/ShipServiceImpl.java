@@ -4,6 +4,8 @@ import com.example.ship.exception.ResourceNotFoundException;
 import com.example.ship.model.Ship;
 import com.example.ship.repository.ShipRepository;
 import com.example.ship.response.Filters;
+import com.example.ship.service.ExcelService;
+import com.example.ship.service.JmsService;
 import com.example.ship.service.ShipService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -16,8 +18,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 @Service
-public class ShipServiceImpl extends BaseServiceImpl<Ship, Integer> implements ShipService {
+public class ShipServiceImpl
+    extends BaseServiceImpl<Ship, Integer>
+    implements ShipService, JmsService<Ship>, ExcelService {
 
     private final ShipRepository repository;
 
@@ -50,8 +55,8 @@ public class ShipServiceImpl extends BaseServiceImpl<Ship, Integer> implements S
             @CachePut(value = "ships", key = "#ship.id")
         },
         evict = {
-            @CacheEvict(value = "ownOperators", key = "#ship.ownName"),
-            @CacheEvict(value = "ownOperators", key = "#ship.operatorName"),
+            @CacheEvict(value = "ownOperators", key = "#ship.ownName", condition = "#ship.ownName!=null"),
+            @CacheEvict(value = "ownOperators", key = "#ship.operatorName", condition = "#ship.operatorName!=null"),
             @CacheEvict(value = "filters", allEntries = true)
         }
     )
@@ -60,9 +65,8 @@ public class ShipServiceImpl extends BaseServiceImpl<Ship, Integer> implements S
     }
 
     @Override
-    @CacheEvict(value = {"ships", "ownOperators", "filters"}, allEntries = true)
     public <S extends Ship> List<S> saveAll(List<S> entities) {
-        return super.saveAll(entities);
+        return repository.saveAll(entities);
     }
 
     @Override
@@ -85,7 +89,7 @@ public class ShipServiceImpl extends BaseServiceImpl<Ship, Integer> implements S
             @CacheEvict(value = "filters", allEntries = true)
         }
     )
-    public void deleteById(Integer id) {
+    public void deleteById(Integer id) throws ResourceNotFoundException {
         super.deleteById(id);
     }
 

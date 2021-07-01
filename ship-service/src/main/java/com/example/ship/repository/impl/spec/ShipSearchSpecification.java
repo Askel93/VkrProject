@@ -16,24 +16,25 @@ import java.util.List;
 @AllArgsConstructor
 public class ShipSearchSpecification implements Specification<Ship> {
 
-	private final SearchCriteria criteria;
+	private final String searchText;
 	private final Filters filters;
 
 
 	@Override
 	public Predicate toPredicate(Root<Ship> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
-		var searchText = criteria.getSearchText().toUpperCase().trim();
-		if (!searchText.trim().equals("")) {
-			searchText = "%" + searchText + "%";
+		if (searchText != null && !searchText.trim().equals("")) {
+			var searchParam = "%" + searchText + "%";
 			List<Predicate> searchPredicates = new ArrayList<>();
-			searchPredicates.add(builder.like(builder.upper(root.get("ownName")), searchText));
-			searchPredicates.add(builder.like(builder.upper(root.get("operatorName")), searchText));
-			searchPredicates.add(builder.like(builder.upper(root.get("name")), searchText));
-			searchPredicates.add(builder.like(builder.upper(root.get("type")), searchText));
-			searchPredicates.add(builder.like(builder.upper(root.get("subType")), searchText));
+			searchPredicates.add(builder.like(builder.upper(root.get("ownName")), searchParam));
+			searchPredicates.add(builder.like(builder.upper(root.get("operatorName")), searchParam));
+			searchPredicates.add(builder.like(builder.upper(root.get("name")), searchParam));
+			searchPredicates.add(builder.like(builder.upper(root.get("type")), searchParam));
+			searchPredicates.add(builder.like(builder.upper(root.get("subType")), searchParam));
 			predicates.add(builder.or(searchPredicates.toArray(new Predicate[] {})));
 		}
+		if (filters == null) return builder.and(predicates.toArray(new Predicate[] {}));
+
 		if (!filters.isShipFilterEmpty()) {
 			if (filters.getNs() != null) {
 				predicates.add(builder.between(root.get("speed"), filters.getNs(), filters.getXs()));

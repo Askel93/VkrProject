@@ -4,7 +4,6 @@ import com.example.ship.exception.ResourceNotFoundException;
 import com.example.ship.repository.BaseRepository;
 import com.example.ship.service.BaseService;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,22 +27,11 @@ public class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
     }
 
     @Override
-    public <S extends T> List<S> saveAll(List<S> entities) {
-        return baseRepository.saveAll(entities);
-    }
-
-    @Override
-    public List<T> findAll() {
-        return baseRepository.findAll();
-    }
-
-    @Override
-    @Transactional
-    public void deleteById(ID id) {
+    public void deleteById(ID id) throws ResourceNotFoundException {
         try {
             baseRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
-            throw new ResourceNotFoundException(e.getMessage());
+            throw new ResourceNotFoundException(String.format("Deleted entity with id %s not found", id));
         }
     }
 }
