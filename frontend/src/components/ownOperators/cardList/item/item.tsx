@@ -1,20 +1,25 @@
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { Card, ListGroup } from 'react-bootstrap';
-import { historyPush } from '../../../../actions/util';
-import { OwnOperator } from '../../../../types';
 
-const CardItem: FunctionComponent<{ ownOperator: OwnOperator }> = ({ ownOperator }) => {
-  
-  const onCardClick = (name: string) => {
-    historyPush(`/ownoperator/${name}`);
-  }
+import { useBtnClickDbClick } from '../../../hoc/hoc';
+import { OwnOperatorItem } from '../../../types';
+import { historyPush } from '../../../../actions/util';
+
+const CardItem: OwnOperatorItem = ({ 
+  entity,
+  onChecked,
+  checked
+}) => {
+  const onOwnOperatorClick = () => historyPush(`/ownoperator?id=${entity.name}`, entity);
+  const clickEvents = useBtnClickDbClick({ onClick: () => onChecked(entity.name), onDoubleClick: onOwnOperatorClick })
+  const classNamePrefix = checked ? " checked-item" : "";
   
   return (
-    <Card className="card-item" border="secondary" onClick={() => onCardClick(ownOperator.name)}>
-      <Card.Header>{ownOperator.name}</Card.Header>
-      <ListGroup>
-        <ListGroup.Item>{ownOperator.address}</ListGroup.Item>
-        <ListGroup.Item>{ownOperator.email}</ListGroup.Item>
+    <Card className={"card-item" + classNamePrefix} border="secondary" {...clickEvents}>
+      <Card.Header>{entity.name}</Card.Header>
+      <ListGroup style={{ minHeight: '120px' }}>
+        <ListGroup.Item>{entity.address}</ListGroup.Item>
+        {entity.email !== null && <ListGroup.Item>{entity.email}</ListGroup.Item>}
       </ListGroup>
     </Card>
   );

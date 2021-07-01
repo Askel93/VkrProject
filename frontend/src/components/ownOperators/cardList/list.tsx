@@ -1,13 +1,18 @@
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { Row } from 'react-bootstrap';
-import { OwnOperator } from '../../../types';
+
+import { OwnOperatorList } from '../../types';
 
 import Item from './item';
 
-const CardList: FunctionComponent<{ ownOperators: OwnOperator[] }> = ({ ownOperators }) => {
-  return(
+const CardList: OwnOperatorList = ({
+  entities,
+  isChecked = () => false,
+  onChecked = () => { },
+}) => {
+  return (
     <Row className="card-list">
-      {ownOperators.map((ownOperator) => <Item key={ownOperator.name} ownOperator={ownOperator} />)}
+      {entities.map((ownOperator) => <Item key={ownOperator.name} entity={ownOperator} checked={isChecked(ownOperator.name)} onChecked={onChecked} />)}
     </Row>
   )
 }

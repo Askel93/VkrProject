@@ -1,32 +1,61 @@
-import React, { FunctionComponent } from 'react';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 
-import { historyPush } from '../../../actions/util';
-import { TypePanel, SortPanel } from '../../util';
+import { TypePanel, SortPanel } from '../../util/form';
+import { WithAuthFunc, useSort, useSearchParam } from '../../hoc';
+import { OwnOperatorPanel } from '../../types';
+import { deleteOwnOperators, saveToExcelByOwn } from '../../../actions';
 
-export interface PanelProps {
-  size: number;
-  sort?: string;
-  typeList: boolean;
-  setTypeList: (type: boolean) => void;
-}
+const Panel: OwnOperatorPanel = ({
+  size,
+  sort = 'name',
+  typeList,
+  setTypeList,
+  listId,
+  onSearch,
+  page,
+  onDeleteClick,
+  search
+}) => {
 
-const Panel: FunctionComponent<PanelProps> = ({ size, sort = "name", typeList, setTypeList }) => {
+  const [initSearch] = useSearchParam(search, "search");
 
-  const sortOptions = [ { text: "По названию", value: "name" }, { text: "По адресу", value: "address" }, { text: "По email", value: "email" } ]
+  const sortOptions = [{ text: "По названию", value: "name" }, { text: "По адресу", value: "address" }, { text: "По email", value: "email" }]
 
-  const onSizeChange = (size: string) => {
-    historyPush(`/ownoperator/1/${size}/${sort}`);
+  const dispatch = useDispatch();
+
+  const [onSizeChange, onSortChange] = useSort({ type: 'ownoperators' });
+
+  const handleDelete = () => {
+    dispatch(deleteOwnOperators({ listId, page, size, sort }))
+    onDeleteClick();
   }
 
-  const onSortChange = (sort: string) => {
-    historyPush(`/ownoperator/1/${size}/${sort}`);
+  const handleExcelSave = (fileName: string) => {
+    dispatch(saveToExcelByOwn({ listId, fileName }));
+    onDeleteClick()
   }
+  
+  const [onExcelSave] = WithAuthFunc(handleExcelSave);
 
   return (
-    <>
-      <SortPanel size={size} sort={sort} sortOptions={sortOptions} onSizeChange={onSizeChange} onSortChange={onSortChange} />
-      <TypePanel active={typeList} setActive={setTypeList} style={{margin: '20px', float: 'right'}} />
-    </>
+    <div className="panel">
+      <TypePanel
+        active={typeList}
+        setActive={setTypeList}
+        isNotEmpty={listId.length !== 0}
+        onExcelSave={onExcelSave}
+        onDeleteClick={handleDelete}
+        onSearch={onSearch}
+        searchText={initSearch} />
+      <SortPanel 
+        size={size}
+        sort={sort}
+        search={search}
+        sortOptions={sortOptions}
+        onSortChange={onSortChange}
+        onSizeChange={onSizeChange} />
+    </div>
   )
 }
 
