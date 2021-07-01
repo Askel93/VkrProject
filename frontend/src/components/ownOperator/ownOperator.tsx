@@ -1,54 +1,69 @@
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { Card } from 'react-bootstrap'
 
+import Loading from '../util/spinner';
+import AccordionItem from '../util/accordion';
 import OwnOperatorItem from './ownOperatorItem';
-import EditModal from './modal';
-import { fetchOwnOperator } from '../../actions/ownOperator';
-import { ownOperatorSelector } from '../../selector';
-import { Loading, AccordionItem } from '../util';
-import ShipTableList from '../ships/tableList';
+import BtnGroup from './btnGroup';
 
-export interface OwnOperatorProfileProps {
-  name: string;
+import { fetchOwnOperator } from '../../actions/ownOperator';
+import { ownOperatorProfileSelector } from '../../selector';
+import { useSearchParam } from '../hoc/hoc';
+
+import { OwnOperatorProfileType, OwnOperator } from '../types';
+
+import './OwnOperator.css'
+
+const isOwnOperator = (obj: any): obj is OwnOperator => {
+  return obj !== undefined && obj.name !== undefined && obj.email !== undefined;
 }
 
-const OwnOperatorProfile: FunctionComponent<OwnOperatorProfileProps> = ({ name }) => {
+const ShipTableList = lazy(() => import('../ships/tableList'));
 
-  let { ownOperator, loading } = useSelector(ownOperatorSelector);
-  // const ships = [
-    // { id: 2, name: "second", type: "qwerty", imo: 12, project: "qwr", port: "SPb", speed: 12, godP: 2019, ownName: "name", operatorName: "name" },
-    // { id: 1, name: "first", type: "qwerty", imo: 12, project: "qwr", port: "SPb", speed: 12, godP: 2019, ownName: "name", operatorName: "name" },
-    // { id: 3, name: "third", type: "qwerty", imo: 12, project: "qwr", port: "SPb", speed: 12, godP: 2019, ownName: "name", operatorName: "name" },
-    // { id: 4, name: "third", type: "qwerty", imo: 12, project: "qwr", port: "SPb", speed: 12, godP: 2019, ownName: "name", operatorName: "name" },
-  // ]
-  // ownOperator = { name: 'OwnOperator', address: 'address', email: 'email', phones: ['12141413', '12141'], fax: ['12142'], shipsOwn: ships }
+const OwnOperatorProfile: OwnOperatorProfileType = () => {
+
+  const { search, state } = useLocation();
+
+  const [id] = useSearchParam(search, "id")
+
+  let ownOperator: OwnOperator| null = useSelector(ownOperatorProfileSelector(id));
+
+  if (ownOperator === null && isOwnOperator(state)) {
+    ownOperator = state;
+  }
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchOwnOperator(name));
-  }, [name])
+    if (id && (ownOperator === null || !ownOperator.shipsOperator)) dispatch(fetchOwnOperator(id));
+    // eslint-disable-next-line
+  }, [])
 
-  return loading || ownOperator === null 
-  ? <Loading />
-  : (
-    <Card className="profile">
-      <Card.Header>
-        Название: {ownOperator.name}
-        <EditModal entity={ownOperator} />
-      </Card.Header>
-      <Card.Body className="read">
-        <OwnOperatorItem entity={ownOperator} />
-        <AccordionItem toggle="Владелец кораблей: ">
-          <ShipTableList ships={ownOperator.shipsOwn || []} withChecked={false} />
-        </AccordionItem>
-        <AccordionItem toggle="Оператор кораблей: ">
-          <ShipTableList ships={ownOperator.shipsOperator || []} withChecked={false} />
-        </AccordionItem>
-      </Card.Body>
-    </Card>
-  )
+  return ownOperator === null
+    ? null
+    : (
+      <Card className="profile">
+        <Card.Header>
+          Название: {id}
+          <BtnGroup entity={ownOperator} />
+        </Card.Header>
+        <Card.Body className="read">
+          <OwnOperatorItem entity={ownOperator} disabled />
+          <Suspense fallback={<Loading isLoad />}>
+            {ownOperator.shipsOwn && ownOperator.shipsOwn.length !== 0 &&
+              <AccordionItem toggle="Владелец кораблей: ">
+                <ShipTableList entities={ownOperator.shipsOwn || []} withChecked={false} />
+              </AccordionItem>}
+            {ownOperator.shipsOperator && ownOperator.shipsOperator.length !== 0 &&
+              <AccordionItem toggle="Оператор кораблей: ">
+                <ShipTableList entities={ownOperator.shipsOperator || []} withChecked={false} />
+              </AccordionItem>}
+          </Suspense>
+        </Card.Body>
+      </Card>
+    )
 }
 
 export default OwnOperatorProfile;
