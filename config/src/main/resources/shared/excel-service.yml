@@ -21,6 +21,13 @@ spring:
 info:
   component: excel-service
 
+eureka:
+  instance:
+    metadata-map:
+      cluster: EXCEL-SERVICE
+    management:
+      context-path: /excel/actuator
+
 server:
   servlet:
     context-path: /excel

@@ -52,8 +52,6 @@ spring:
 #    username: admin
 #    password: admin-password
     url: http://registry:8761/admin
-#  rabbitmq:
-#    host: rabbitmq
 
 server:
   servlet:
@@ -78,5 +76,5 @@ management:
       exposure.include: "*"
     web:
       exposure.include: "*"
-      base-path: /actuator
+#      base-path: /actuator
       cors.allowed-origins: true

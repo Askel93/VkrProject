@@ -15,6 +15,13 @@ server:
 info:
   component: ship-service
 
+eureka:
+  instance:
+    metadata-map:
+      cluster: SHIP-SERVICE
+      management:
+        context-path: /ship/actuator
+
 spring:
   main:
     allow-bean-definition-overriding: true
@@ -54,6 +61,6 @@ feign:
 
 logging:
   level:
-    org.hibernate:
-      SQL: DEBUG
+#    org.hibernate:
+#      SQL: DEBUG
   # persister.entity: ERROR

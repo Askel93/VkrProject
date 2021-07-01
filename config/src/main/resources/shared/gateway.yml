@@ -2,7 +2,7 @@ hystrix:
   command:
     default:
       execution:
-        iso lation:
+        isolation:
           thread:
             timeoutInMilliseconds: 30000
 

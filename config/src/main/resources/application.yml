@@ -1,16 +1,27 @@
+info.component: Config Server
+
 spring:
   cloud:
     config:
       server:
-        git:
-          uri: https://github.com/mitinikitos/VkrProject/tree/master/config/src/main/resources/shared
-          skipSslValidation: true
-#        native.search-locations: classpath:/shared
-#  profiles:
-#    active: native
+#        git:
+#          uri: https://github.com/mitinikitos/vkr-config.git
+#          force-pull: true
+#          search-paths:
+#            - 'excel-service'
+#            - 'application'
+#            - 'hystrix-service'
+#          username: mitinikitos
+#          password: Mityuhan1312
+#          clone-on-start: true
+#          timeout: 10
+        native.search-locations: classpath:/shared
+  profiles:
+#    active: git
+    active: native
   security:
     user:
-      password: ${CONFIG_SERVICE_PASSWORD}
+      password: ${CONFIG_SERVICE_PASSWORD:password}
   main:
     banner-mode: OFF
 

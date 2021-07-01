@@ -15,6 +15,6 @@ spring:
       ddl-auto: update
     generate-ddl: true
 
-logging:
-  pattern:
-    console:
+#logging:
+#  pattern:
+#    console:

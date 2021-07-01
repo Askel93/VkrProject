@@ -19,6 +19,13 @@ feign:
     connectTimeout: 160000000
     readTimeout: 160000000
 
+eureka:
+  instance:
+    metadata-map:
+      cluster: ACCOUNT-SERVICE
+    management:
+      context-path: /accounts/actuator
+
 spring:
   main:
     allow-bean-definition-overriding: true
