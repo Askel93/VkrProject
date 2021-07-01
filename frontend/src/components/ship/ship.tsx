@@ -1,72 +1,99 @@
-import React, { FunctionComponent, useEffect, lazy } from 'react';
+import React, { useEffect, lazy, Suspense, useState } from 'react';
 import { Card } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { shipSelector } from '../../selector';
+import { shipProfileSelector } from '../../selector';
 import { fetchShipRequest, historyPush } from '../../actions';
+import { useSearchParam } from '../hoc/hoc';
 
-import { Loading, AccordionItem } from '../util';
+import Loading from '../util/spinner';
+import AccordionItem from '../util/accordion';
 import ShipItem from './ship/ship';
-import OwnOperatorItem from '../ownOperator/ownOperatorItem';
+import ShipEngineItem from './shipEngine';
+import DimensionsItem from './dimensions';
+import CapacityItem from './capacity';
 
-import { Capacity, OwnOperator, defaultDimensions, defaultCapacity } from '../../types';
+import { ShipProfileType, Ship } from '../types';
+import { useLocation } from 'react-router-dom';
 
-const DimensionsItem = lazy(() => import('./dimensions'));
-const CapacityItem = lazy(() => import('./capacity'));
-const EditModal = lazy(() => import('./modal'));
+const BtnGroup = lazy(() => import('./btnGroup'));
+const OwnOperatorItem = lazy(() => import('../ownOperator/ownOperatorItem'));
 
-export interface ShipProps {
-  id: number;
+const isShip = (obj: any): obj is Ship => {
+  return obj !== undefined && obj.id !== undefined && obj.name !== undefined && obj.type !== undefined;
 }
 
-const ShipProfile: FunctionComponent<ShipProps> = ({ id }) => {
+const ShipProfile: ShipProfileType = () => {
 
-  let { ship, loading } = useSelector(shipSelector);
+  const { state, search } = useLocation();
 
-  // const own: OwnOperator = { name: "own", address: "address", email: "qwn@mail.ru", phones: ["120968594", "12116435"], fax: ["120968594", "12116435"]}
-  // const operator: OwnOperator = { name: "own", address: "address", email: "qwn@mail.ru", phones: ["120968594", "12116435"], fax: ["120968594", "12116435"]}
-  // const shipCapacity: Capacity = {dedv: 124, nt: 1241, passP: 1214, passK: 128753, gt: 12141}
-  // ship = { id: 1, name: "first", type: "qwerty", imo: 12, project: "qwr", port: "SPb", speed: 12, godP: 2019, ownName: "own", operatorName: "name", own, operator, shipCapacity };
+  const id = parseFloat(useSearchParam(search, "id")[0] || "");
+
+  const [activeKey, setActiveKey] = useState("");
+
+  let ship: Ship | null = useSelector(shipProfileSelector(id));
+
+  if (ship === null && isShip(state)) {
+    ship = state;
+  }
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchShipRequest(id));
-  }, [id])
+    if (ship === null || !ship.shipCapacity) dispatch(fetchShipRequest(id));
+    // eslint-disable-next-line
+  }, [])
 
-  const onOwnOperatorClick = (name: string) => {
-    historyPush(`/ownoperator/${name}`);
-  }
+  const onOwnOperatorClick = (name: string) => historyPush(`/ownoperator?id=${name}`);
 
-  return ship === null || loading 
-  ? <Loading />
-  : (
-    <Card className="profile">
-      <Card.Header>
-        Название: {ship.name}
-        <EditModal {...ship} />
-      </Card.Header>
-      <Card.Body className="read">
-        <ShipItem entity={ship} />
-        {ship.own
-        ? <AccordionItem toggle={`Владелец: ${ship.ownName}`} onDoubleClick={() => onOwnOperatorClick(ship?.ownName || '')}>
-            <OwnOperatorItem entity={ship.own} />
-          </AccordionItem>
-        : null}
-        {ship.operator
-        ? <AccordionItem toggle={`Оператор: ${ship.operatorName}`} onDoubleClick={() => onOwnOperatorClick(ship?.operatorName || '')}>
-            <OwnOperatorItem entity={ship.operator} />
-          </AccordionItem>
-        : null}
-        <AccordionItem toggle="Подробнее">
-          <>
-            <CapacityItem entity={ship.shipCapacity || defaultCapacity} />
-            <DimensionsItem entity={ship.shipDimensions || defaultDimensions} />
-          </>
-        </AccordionItem>
-      </Card.Body>
-    </Card>
-  )
+  return (ship === null)
+    ? null
+    : (
+      <Card className="profile">
+        <Card.Header>
+          Название: {ship.name}
+          <Suspense fallback={<Loading isLoad />}>
+            <BtnGroup entity={ship} />
+          </Suspense>
+        </Card.Header>
+        <Card.Body className="read">
+          <ShipItem entity={ship} disabled />
+          <Suspense fallback={<Loading isLoad />}>
+            {ship.own &&
+              <AccordionItem
+                toggle={`Владелец: ${ship.ownName}`}
+                onDoubleClick={() => onOwnOperatorClick(ship!.ownName)}
+                ariaLabel="own"
+                activeKey={activeKey}
+                onToggleClick={(key) => setActiveKey(typeof key === 'string' ? key : "")}
+                eventKey="own">
+                <OwnOperatorItem key="own" idPrefix="operator" entity={ship.own} disabled />
+              </AccordionItem>}
+            {ship.operator &&
+              <AccordionItem
+                toggle={`Оператор: ${ship.operatorName}`}
+                onDoubleClick={() => onOwnOperatorClick(ship!.operatorName)}
+                ariaLabel="operator"
+                activeKey={activeKey}
+                onToggleClick={(key) => setActiveKey(typeof key === 'string' ? key : "")}
+                eventKey="operator">
+                <OwnOperatorItem key="operator" idPrefix="own" entity={ship.operator} disabled />
+              </AccordionItem>}
+          </Suspense>
+          {ship.shipCapacity && ship.shipDimensions && ship.shipEngine &&
+            <AccordionItem
+              toggle="Подробнее"
+              ariaLabel="other"
+              activeKey={activeKey}
+              onToggleClick={(key) => setActiveKey(key || "")}
+              eventKey="other">
+              <CapacityItem entity={ship.shipCapacity} disabled />
+              <DimensionsItem entity={ship.shipDimensions} disabled />
+              <ShipEngineItem entity={ship.shipEngine} disabled />
+            </AccordionItem>}
+        </Card.Body>
+      </Card>
+    )
 }
 
 export default ShipProfile;

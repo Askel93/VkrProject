@@ -1,79 +1,92 @@
-import React, { FunctionComponent, useState } from 'react';
-import { ButtonGroup, Button } from 'react-bootstrap';
+import React, { forwardRef, useState, ForwardedRef, useRef, useImperativeHandle } from 'react';
+import { ButtonGroup, Button, Form } from 'react-bootstrap';
 
-import { ModalInput } from '../../util';
-import { Capacity } from '../../../types';
-import { ModalItem } from '../types';
+import { Input } from '../../util';
+import toObject from '../../hoc/formDataToObject';
+import { intPattern, ModalItemProps, Capacity, RefModalItem } from '../../types';
 
-const CapacityItem: FunctionComponent<ModalItem<Capacity>> = ({
+const CapacityItem = forwardRef(({
   entity, 
-  disabled = true,
+  disabled,
   onClick = () => {},
-  onSaving = () => {}
-}) => {
-  const [capacity, setCapacity] = useState(entity);
+  style
+}: ModalItemProps<Capacity>, ref: ForwardedRef<RefModalItem<Capacity>>) => {
 
-  const handleDedvChange = (val: string) => setCapacity(prev => ({...prev, dedv: parseFloat(val)}));
-  const handlePassKChange = (val: string) => setCapacity(prev => ({...prev, passK: parseFloat(val)}));
-  const handlePassPChange = (val: string) => setCapacity(prev => ({...prev, passP: parseFloat(val)}));
-  const handleNtChange = (val: string) => setCapacity(prev => ({...prev, nt: parseFloat(val)}));
-  const handleGtChange = (val: string) => setCapacity(prev => ({...prev, gt: parseFloat(val)}));
+  const [validated, setValidated] = useState(false);
 
-  const handleBtnClick = (i: number) => {
-    onSaving(i);
-    onClick(capacity);
+  const formRef = useRef<HTMLFormElement>(null);
+  useImperativeHandle(ref, () => ({ saveEntity: editCapacity, isValid }))
+  const isValid = () => {
+    if (formRef.current === null || !formRef.current.checkValidity()) {
+      setValidated(true);
+      return false
+    }
+    return true;
   }
+  const editCapacity = () => {
+    if (formRef.current !== null) {
+      const formData = new FormData(formRef.current)
+      return toObject(formData) as Capacity;
+    }
+    return entity;
+  }
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.stopPropagation()
+    e.preventDefault()
+    handleBtnClick(1);
+  }
+  const handleBtnClick = (i: number) => isValid() && onClick(i);
   
+  const intProps = { type: disabled ? "" : "number", pattern: intPattern, hasValidation: true, step: 1, disabled, feedback: "Please provide a valid value", className: 'm-0' };
+
   return (
-    <>
-      <ModalInput 
+    <Form onSubmit={onSubmit} noValidate validated={validated} style={style} ref={formRef}>
+      <Input
         id="dedv"
-        label="Дедвейт"
-        value={capacity.dedv || ""}
-        onChange={(i) => handleDedvChange(i)}
-        placeholder="Type deadweight"
-        disabled={disabled}  />
-      <ModalInput 
+        name="dedv"
+        prepend="Дедвейт"
+        defaultValue={entity.dedv || ""}
+        {...intProps}
+        placeholder="Type deadweight"  />
+      <Input
         id="passk"
-        placeholder="Type ..."
-        value={capacity.passK || ""}
-        onChange={(i) => handlePassKChange(i)}
-        disabled={disabled}
-      />
-      <ModalInput 
+        name="passK"
+        placeholder="Type passenger capacity"
+        prepend="Количество кают"
+        {...intProps}
+        defaultValue={entity.passK || ""} />
+      <Input
         id="passp"
-        placeholder="Type ..."
-        value={capacity.passP || ""}
-        onChange={(i) => handlePassPChange(i)}
-        disabled={disabled}
-      />
-      <ModalInput 
+        name="passP"
+        placeholder="Type number of cabins"
+        prepend="Пассажировместимость"
+        defaultValue={entity.passP || ""}
+        {...intProps} />
+      <Input
         id="nettonnage"
-        label="Чистая вместимость"
+        name="nt"
+        prepend="Чистая вместимость"
         placeholder="Type net tonnage"
-        value={capacity.nt || ""}
-        onChange={(i) => handleNtChange(i)}
-        disabled={disabled}
-      />
-      <ModalInput 
+        defaultValue={entity.nt || ""}
+        {...intProps} />
+      <Input
         id="grosstonnage"
-        label="Валовая вместимость"
+        name="gt"
+        prepend="Валовая вместимость"
         placeholder="Type gross tonnage"
-        value={capacity.gt || ""}
-        onChange={(i) => handleGtChange(i)}
-        disabled={disabled}
-      />
-      {disabled ? null
-      : <ButtonGroup>
-        <Button onClick={() => handleBtnClick(-1)}>
+        defaultValue={entity.gt || ""}
+        {...intProps} />
+      {!disabled && <ButtonGroup className="float-left mt-2">
+        <Button onClick={() => handleBtnClick(-1)} variant="secondary">
           Назад
         </Button>
-        <Button onClick={() => handleBtnClick(1)}>
+        <Button type="submit" variant="secondary">
           Дальше
         </Button>
       </ButtonGroup>}
-    </>
+    </Form>
   )
-}
+})
 
-export default CapacityItem;
+export default React.memo(CapacityItem, (prev, next) => prev.entity === next.entity);

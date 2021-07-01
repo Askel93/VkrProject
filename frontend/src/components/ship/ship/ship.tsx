@@ -1,55 +1,141 @@
-import React, { FunctionComponent, useState } from 'react'
-import { ButtonGroup, Button } from 'react-bootstrap';
+import React, { useRef, useState, forwardRef, ForwardedRef, useImperativeHandle } from 'react'
+import { ButtonGroup, Button, Form } from 'react-bootstrap';
 
-import { ModalInput } from '../../util';
+import { Input } from '../../util/form';
+import toObject from '../../hoc/formDataToObject';
 
-import { Ship } from '../../../types'
-import { ModalItem } from '../types'
+import { doublePattern, intPattern, newValuePattern, ModalItemProps, Ship, RefModalItem } from '../../types';
 
-const ShipItem: FunctionComponent<ModalItem<Ship>> = ({
+const ShipItem = forwardRef(({
   entity,
-  disabled = true,
-  onClick = () => {},
-  onSaving = () => {}
-}) => {
-  const [ship, setShip] = useState(entity);
-  
-  const handleNameChange = (name: string) => setShip(prev => ({ ...prev, name }));
-  const handleTypeChange = (type: string) => setShip(prev => ({ ...prev, type }));
-  const handleSubTypeChange = (subType: string) => setShip(prev => ({ ...prev, subType }));
-  const handlePortChange = (port: string) => setShip(prev => ({ ...prev, port }));
-  const handleProjectChange = (project: string) => setShip(prev => ({ ...prev, project }));
-  const handleSpeedChange = (speed: string) => setShip(prev => ({ ...prev, speed: parseFloat(speed) }));
-  const handleGodPChange = (godP: string) => setShip(prev => ({ ...prev, godP: parseFloat(godP) }));
-  const handleImoChange = (imo: string) => setShip(prev => ({ ...prev, imo: parseFloat(imo) }));
+  disabled,
+  isCreate,
+  onClick = () => { },
+  style,
+}: ModalItemProps<Ship>, ref: ForwardedRef<RefModalItem<Ship>>) => {
+  const [validated, setValidated] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  useImperativeHandle(ref, () => ({ saveEntity: editShip, isValid }))
 
-  const handleBtnClick = (i: number) => {
-    onClick(ship);
-    onSaving(i);
+  const handleBtnClick = (i: number) => isValid() && onClick(i)
+  const isValid = () => {
+    if (formRef.current === null || !formRef.current.checkValidity()) {
+      setValidated(true);
+      return false
+    }
+    return true;
+  }
+  const editShip = () => {
+    if (formRef.current !== null) {
+      const formData = new FormData(formRef.current)
+      const newShip = toObject(formData) as Ship;
+      if (!isCreate) {
+        newShip.id = entity.id;
+      }
+      return newShip;
+    }
+    return entity;
   }
 
+  const initDefaultValue = (val?: string | number) => val || (disabled && 'Не указано') || '';
+  const stringProps = { disabled, className: 'm-0' }
+  const doubleProps = { ...stringProps, type: disabled ? "" : "number", hasValidation: true, pattern: doublePattern, feedback: "Please provide a valid value" }
+  const intProps = { ...doubleProps, pattern: intPattern, step: 1, max: new Date().getFullYear() }
   return (
-    <>
-      <ModalInput label="Региональный номер: " id="regnum" value={entity.id} disabled={true} />
-      {!disabled && <ModalInput label="Название: " id="name" value={ship.name} placeholder="Type name ship" disabled={false} onChange={handleNameChange} />}
-      <ModalInput label="Тип корабля: " id="type" value={ship.type} placeholder="Type type ship" disabled={disabled} onChange={handleTypeChange} />
-      <ModalInput label="Подтип корабля: " id="subtype" value={ship.subType} placeholder="Type subtype ship" disabled={disabled} onChange={handleSubTypeChange} />
-      <ModalInput label="Порт: " id="port" value={ship.port} placeholder="Type port ship" disabled={disabled} onChange={handlePortChange} />
-      <ModalInput label="Проект: " id="project" value={ship.project} placeholder="Type project ship" disabled={disabled} onChange={handleProjectChange} />
-      <ModalInput label="Скорость: " id="speed" value={ship.speed} placeholder="Type speed ship" disabled={disabled} onChange={handleSpeedChange} />
-      <ModalInput label="Год постройки: " id="godp" value={ship.godP} placeholder="Type year of construction ship" disabled={disabled} onChange={handleGodPChange} />
-      <ModalInput label="IMO: " id="imo" value={ship.imo} placeholder="Type imo ship" disabled={disabled} onChange={handleImoChange} />
-      {disabled ? null
-      : <ButtonGroup>
-        <Button onClick={() => handleBtnClick(-1)}>
-          Назад
-        </Button>
-        <Button onClick={() => handleBtnClick(1)}>
-          Сохранить
-        </Button>
-      </ButtonGroup>}
-    </>
+    <Form onSubmit={() => handleBtnClick(1)} noValidate validated={validated} style={style} ref={formRef}>
+      <Input
+        prepend="Региональный номер: "
+        id="regnum"
+        name="id"
+        defaultValue={entity.id}
+        {...stringProps}
+        required={isCreate}
+        pattern={!isCreate ? intPattern : newValuePattern(entity.id)}
+        feedback={isCreate ? "Registration number must be unique" : undefined}
+        disabled={!isCreate}
+      />
+      {!disabled &&
+        <Input
+          prepend="Название: "
+          id="name"
+          name="name"
+          defaultValue={entity.name}
+          {...stringProps}
+          required={isCreate}
+          pattern={isCreate ? newValuePattern(entity.name) : undefined}
+          feedback={isCreate ? "Name of the ship must be unique" : undefined}
+          placeholder="Type name ship"
+        />}
+      <Input
+        prepend="Тип судна: "
+        id="type"
+        name="type"
+        defaultValue={initDefaultValue(entity.type)}
+        placeholder="Enter the ship type"
+        {...stringProps}
+      />
+      <Input
+        prepend="Подтип судна: "
+        id="subtype"
+        name="subType"
+        defaultValue={initDefaultValue(entity.subType)}
+        placeholder="Enter the ship subtype"
+        {...stringProps}
+      />
+      <Input
+        prepend="Позывной: "
+        id="callsign"
+        name="callSign"
+        defaultValue={initDefaultValue(entity.callSign)}
+        placeholder="Enter the ship callsign"
+        {...stringProps}
+      />
+      <Input
+        prepend="Порт: "
+        id="port"
+        name="port"
+        defaultValue={initDefaultValue(entity.port)}
+        placeholder="Type port ship"
+        {...stringProps}
+      />
+      <Input
+        prepend="Проект: "
+        id="project"
+        name="project"
+        defaultValue={entity.project}
+        placeholder="Type project ship"
+        {...stringProps}
+      // onChange={handleProjectChange}
+      />
+      <Input
+        prepend="Скорость: "
+        id="speed"
+        name="speed"
+        defaultValue={entity.speed}
+        placeholder="Type speed ship"
+        {...doubleProps} />
+      <Input
+        prepend="Год постройки: "
+        id="godp"
+        name="godP"
+        defaultValue={entity.godP}
+        placeholder="Type year of construction ship"
+        {...intProps} />
+      <Input
+        prepend="IMO: "
+        id="imo"
+        name="imo"
+        defaultValue={entity.imo}
+        placeholder="Type imo ship"
+        {...stringProps}
+      />
+      {!disabled &&
+        <ButtonGroup className="float-left mt-2">
+          <Button onClick={() => handleBtnClick(-1)} variant="secondary">Назад</Button>
+          <Button type="submit" variant="secondary">Сохранить</Button>
+        </ButtonGroup>}
+    </Form>
   )
-}
+});
 
-export default ShipItem;
+export default React.memo(ShipItem, (prev, next) => prev.entity === next.entity);

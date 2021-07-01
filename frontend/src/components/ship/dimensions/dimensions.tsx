@@ -1,92 +1,106 @@
-import React, { FunctionComponent, useState } from 'react';
-import { ButtonGroup, Button } from 'react-bootstrap';
+import React, { forwardRef, useState, ForwardedRef, useImperativeHandle, useRef } from 'react';
+import { ButtonGroup, Button, Form } from 'react-bootstrap';
 
-import { ModalInput } from '../../util';
+import { Input } from '../../util/form';
 
-import { Dimensions } from '../../../types';
-import { ModalItem } from '../types';
+import toObject from '../../hoc/formDataToObject';
 
-export interface DimensionsItemProps {
-  dimensions: Dimensions;
-  disabled?: boolean;
-  onClick?: (dimensions: Dimensions) => void
-}
+import { doublePattern, ModalItemProps, Dimensions, RefModalItem } from '../../types';
 
-const DimensionsItem: FunctionComponent<ModalItem<Dimensions>> = ({
+const DimensionsItem = forwardRef(({
   entity,
-  disabled = true,
-  onClick = () => {},
-  onSaving = () => {}
-}) => {
-  const [breadth, setBreadth] = useState<number | null>(entity.breadth);
-  const [depth, setDepth] = useState<number | null>(entity.depth);
-  const [disp, setDisp] = useState<number | null>(entity.disp);
-  const [draught, setDraught] = useState<number | null>(entity.draught);
-  const [length, setLength] = useState<number | null>(entity.length);
-  const [shipClass, setShipClass] = useState<string | null>(entity.shipClass);
+  disabled,
+  onClick = () => { },
+  style
+}: ModalItemProps<Dimensions>, ref: ForwardedRef<RefModalItem<Dimensions>>) => {
+  const [validated, setValidated] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null);
+  useImperativeHandle(ref, () => ({ saveEntity: editDimensions, isValid }))
 
-  const handleBtnClick = (i: number) => {
-    const dimensions: Dimensions = { breadth, depth, disp, draught, length, shipClass };
-    onClick(dimensions);
-    onSaving(i);
+  const isValid = () => {
+    if (formRef.current === null || !formRef.current.checkValidity()) {
+      setValidated(true);
+      return false
+    }
+    return true;
+  }
+  const editDimensions = () => {
+    if (formRef.current !== null) {
+      const formData = new FormData(formRef.current)
+      const newDimensions = toObject(formData) as Dimensions;
+      return newDimensions;
+    }
+    return entity;
   }
 
+  const { breadth, depth, disp, draught, length, shipClass } = entity;
+
+  const handleBtnClick = (i: number) => isValid() && onClick(i);
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleBtnClick(1);
+  }
+
+  const doubleProps = { type: disabled ? "" : "number", hasValidation: true, pattern: doublePattern, disabled, feedback: "Please provide a valid value", className: 'm-0' }
   return (
-    <>
-      <ModalInput 
+    <Form onSubmit={onSubmit} noValidate validated={validated} style={style} ref={formRef}>
+      <Input
         id="breadth"
-        label="Ширина"
+        name="breadth"
+        prepend="Ширина"
         placeholder="Type breadth"
-        value={breadth || ""}
-        onChange={(i) => setBreadth(parseFloat(i))}
-        disabled={disabled}
+        defaultValue={breadth || ""}
+        {...doubleProps}
       />
-      <ModalInput 
+      <Input
         id="depth"
-        label=""
-        placeholder="Type ..."
-        value={depth || ""}
-        onChange={(i) => setDepth(parseFloat(i))}
-        disabled={disabled} />
-      <ModalInput 
+        name="depth"
+        prepend="Высота борта"
+        placeholder="Type depth"
+        defaultValue={depth || ""}
+        {...doubleProps} />
+      <Input
         id="draught"
-        label=""
-        placeholder="Type ..."
-        value={draught || ""}
-        onChange={(i) => setDraught(parseFloat(i))}
-        disabled={disabled} />
-      <ModalInput 
+        name="draught"
+        prepend="Осадка"
+        placeholder="Type draught"
+        defaultValue={draught || ""}
+        {...doubleProps} />
+      <Input
         id="disp"
-        label=""
-        placeholder="Type ..."
-        value={disp || ""}
-        onChange={(i) => setDisp(parseFloat(i))}
-        disabled={disabled} />
-      <ModalInput 
+        name="disp"
+        prepend="Водоизмещение"
+        placeholder="Type displacement"
+        defaultValue={disp || ""}
+        {...doubleProps} />
+      <Input
         id="length"
-        label=""
+        name="length"
+        prepend="Длина"
         placeholder="Type ..."
-        value={length || ""}
-        onChange={(i) => setLength(parseFloat(i))}
-        disabled={disabled} />
-      <ModalInput 
+        defaultValue={length || ""}
+        {...doubleProps} />
+      <Input
         id="shipclass"
-        label="Класс: "
+        name="shipClass"
+        prepend="Класс: "
         placeholder="Type class"
-        value={shipClass || ""}
-        onChange={setShipClass}
-        disabled={disabled} />  
+        defaultValue={shipClass || ""}
+        className="m-0"
+        disabled={disabled} />
       {disabled ? null
-      : <ButtonGroup>
-          <Button onClick={() => handleBtnClick(-1)}>
+        : <ButtonGroup className="float-left mt-2">
+          <Button onClick={() => handleBtnClick(-1)} variant="secondary">
             Назад
           </Button>
-          <Button onClick={() => handleBtnClick(1)}>
+          <Button type="submit" variant="secondary">
             Дальше
           </Button>
-      </ButtonGroup>}
-    </>
+        </ButtonGroup>}
+    </Form>
   )
-}
+})
 
-export default DimensionsItem;
+export default React.memo(DimensionsItem, (prev, next) => prev.entity === next.entity);
