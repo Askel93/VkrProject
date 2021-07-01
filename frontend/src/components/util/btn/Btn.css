@@ -1,0 +1,12 @@
+.next-icon, .prev-icon {
+  display: none;
+}
+
+@media all and (max-width: 500px) {
+  .page {
+    display: none;
+  }
+  .next-icon, .prev-icon {
+    display: block;
+  }
+}
