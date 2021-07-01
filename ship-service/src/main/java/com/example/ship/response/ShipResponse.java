@@ -1,19 +1,23 @@
 package com.example.ship.response;
 
 import com.example.ship.config.View;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.example.ship.model.*;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @JsonView(View.UI.class)
-public class ShipResponse {
+public class ShipResponse
+		extends BaseResponse<ShipResponse, Ship>
+{
+	private String _type;
+
 	private Integer id;
 	private String name;
 	private String type;
@@ -37,8 +41,31 @@ public class ShipResponse {
 
 	private ShipDimensions shipDimensions;
 
-	public static ShipResponse toResponse(Ship ship) {
+	public ShipResponse() {
+		super();
+	}
+
+	@Override
+	public ShipResponse toListResponse(Ship ship) {
+		return ShipResponse.builder()
+				._type("ship")
+				.id(ship.getId())
+				.name(ship.getName())
+				.type(ship.getType())
+				.subType(ship.getSubType())
+				.imo(ship.getImo())
+				.callSign(ship.getCallSign())
+				.project(ship.getProject())
+				.port(ship.getPort())
+				.speed(ship.getSpeed())
+				.godP(ship.getGodP())
+				.build();
+	}
+
+	@Override
+	public ShipResponse toResponse(Ship ship) {
 		var shipResponse = ShipResponse.builder()
+				._type("ship")
 				.id(ship.getId())
 				.name(ship.getName())
 				.type(ship.getType())
@@ -53,29 +80,22 @@ public class ShipResponse {
 				.shipCapacity(ship.getShipCapacity())
 				.shipDimensions(ship.getShipDimensions())
 				.build();
-		if (!ship.isEmptyOwn()) {
+		if (ship.isNotEmptyOwn()) {
 			shipResponse.setOwn(ship.getOwn());
 			shipResponse.setOwnName(ship.getOwnName());
 		}
-		if (!ship.isEmptyOperator()) {
+		if (ship.isNotEmptyOperator()) {
 			shipResponse.setOperator(ship.getOperator());
 			shipResponse.setOperatorName(ship.getOperatorName());
 		}
 		return shipResponse;
 	}
 
-	public static ShipResponse toListResponse(Ship ship) {
-		return ShipResponse.builder()
-				.id(ship.getId())
-				.name(ship.getName())
-				.type(ship.getType())
-				.subType(ship.getSubType())
-				.imo(ship.getImo())
-				.callSign(ship.getCallSign())
-				.project(ship.getProject())
-				.port(ship.getPort())
-				.speed(ship.getSpeed())
-				.godP(ship.getGodP())
-				.build();
+	public Ship toDto() {
+		return new Ship(id, name, type, subType,
+										imo, callSign, project, port,
+										speed, godP, ownName, own,
+										operatorName, operator, shipEngine,
+										shipCapacity, shipDimensions);
 	}
 }

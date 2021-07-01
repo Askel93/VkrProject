@@ -1,9 +1,7 @@
 package com.example.ship.model;
 
-import com.example.ship.config.View;
 import com.example.ship.response.CapacityFilter;
-import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -39,15 +37,13 @@ import javax.persistence.*;
 @Table(name = "ship_capacity")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-@JsonView(View.UI.class)
 public class ShipCapacity {
 
 	@Id
 	@Column(name = "reg_num")
 	private Integer regNum;
 
-	@JsonView(View.REST.class)
+	@JsonIgnore
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "reg_num", referencedColumnName = "reg_num")
 	private Ship ship;
@@ -59,4 +55,8 @@ public class ShipCapacity {
 	private Integer passP;
 	private Integer gt;
 	private Integer nt;
+
+	public ShipCapacity(int regNum) {
+		this.regNum = regNum;
+	}
 }

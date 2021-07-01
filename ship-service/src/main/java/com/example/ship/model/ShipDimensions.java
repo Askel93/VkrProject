@@ -1,8 +1,7 @@
 package com.example.ship.model;
 
-import com.example.ship.config.View;
 import com.example.ship.response.DimensionsFilter;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -38,13 +37,12 @@ import javax.persistence.*;
 @Table(name = "ship_dimensions")
 @Data
 @NoArgsConstructor
-@JsonView(View.UI.class)
 public class ShipDimensions {
 
 	@Id
 	@Column(name = "reg_num")
 	private int regNum;
-	@JsonView(View.REST.class)
+	@JsonIgnore
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "reg_num", referencedColumnName = "reg_num")
 	private Ship ship;
@@ -60,4 +58,8 @@ public class ShipDimensions {
 	private double depth;
 	@Column(name = "class", columnDefinition = "text")
 	private String shipClass;
+
+	public ShipDimensions(int regNum) {
+		this.regNum = regNum;
+	}
 }

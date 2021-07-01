@@ -1,7 +1,6 @@
 package com.example.ship.model;
 
 import com.example.ship.config.View;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import lombok.Data;
@@ -31,12 +30,12 @@ public class OwnOperator {
     private String address;
     @Column(name = "phones", columnDefinition = "text[]")
     @Type(type = "string-array")
-    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+//    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     private String[] phones;
     private String email;
     @Column(name = "fax", columnDefinition = "text[]")
     @Type(type = "string-array")
-    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+//    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     private String[] fax;
 
     @JsonView(View.REST.class)
@@ -46,12 +45,10 @@ public class OwnOperator {
     @OneToMany(mappedBy = "operator")
     private List<Ship> shipsOperator;
 
-    @JsonView(View.REST.class)
     public String getPhonesAsString() {
         return getArrayAsString(phones);
     }
 
-    @JsonView(View.REST.class)
     public String getFaxAsString() {
         return getArrayAsString(fax);
     }
@@ -67,5 +64,17 @@ public class OwnOperator {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    public OwnOperator(String name, String address, String email, String[] phones, String[] fax) {
+        this.name = name;
+        this.address = address;
+        this.email = email;
+        this.phones = phones;
+        this.fax = fax;
+    }
+
+    public OwnOperator(String name) {
+        this.name = name;
     }
 }

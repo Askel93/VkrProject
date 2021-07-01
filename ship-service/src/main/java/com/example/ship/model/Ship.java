@@ -2,9 +2,9 @@ package com.example.ship.model;
 
 import com.example.ship.config.View;
 import com.example.ship.response.ShipFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
@@ -50,7 +50,6 @@ import javax.persistence.*;
 @Entity
 @Table(name = "ship")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonView(View.UI.class)
@@ -86,7 +85,7 @@ public class Ship {
     @JsonView(View.REST.class)
     private OwnOperator operator;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "ship", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "ship", cascade = { CascadeType.MERGE, CascadeType.REMOVE }, orphanRemoval = true, optional = false)
     @JsonView(View.REST.class)
     private ShipEngine shipEngine;
 
@@ -98,12 +97,27 @@ public class Ship {
     @JsonView(View.REST.class)
     private ShipDimensions shipDimensions;
 
-    @JsonView(View.REST.class)
-    public boolean isEmptyOwn() {
-        return ownName == null || ownName.equals("");
+    @JsonIgnore
+    public boolean isNotEmptyOwn() {
+        return ownName != null && !ownName.equals("");
     }
-    @JsonView(View.REST.class)
-    public boolean isEmptyOperator() {
-        return operatorName == null || operatorName.equals("");
+    @JsonIgnore
+    public boolean isNotEmptyOperator() {
+        return operatorName != null && !operatorName.equals("");
+    }
+
+    public Ship(int id, String name, int godP) {
+        this.id = id;
+        this.name = name;
+        this.godP = godP;
+        this.shipCapacity = new ShipCapacity(id);
+        this.shipDimensions = new ShipDimensions(id);
+        this.shipEngine = new ShipEngine(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Ship [ " + id + ", " + name + ", " + type + ", " + subType + ", " +
+            imo + ", " + callSign + ", " + project + ", " + godP + " ]";
     }
 }
