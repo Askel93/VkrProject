@@ -6,6 +6,7 @@ import excelSaga from './excel';
 import jwtSaga from './jwt';
 import shipSaga from './ship';
 import userSaga from './user';
+import ownOperatorSaga from './ownOperator';
 
 import { State } from '../types'
 
@@ -27,5 +28,6 @@ export default function* rootSaga() {
     jwtSaga(),
     shipSaga(),
     userSaga(),
+    ownOperatorSaga(),
   ]);
 }

@@ -1,17 +1,14 @@
 import { JWTReducer, JWTState, TokenObject } from '../types';
 
-
-//todo
-const initState = (token: TokenObject = JSON.parse(localStorage.getItem("token") as string)): JWTState => {
-
-  if (!token) {
+const initState = (): JWTState => {
+  const token: TokenObject | null = JSON.parse(sessionStorage.getItem("access_token") as string)
+  const refreshToken: TokenObject = JSON.parse(sessionStorage.getItem("refresh_token") || localStorage.getItem("refresh_token") as string);
+  if (!refreshToken) {
     return { isAuth: false, isAdmin: false, loading: false };
   }
-  
-  console.log(token.accessExp);
-  const isAuth = token.accessExp - new Date().getTime() > 0;
-  const isAdmin = token.authorities.findIndex(i => i.authority === "ROLE_ADMIN") !== -1;
-  return { isAuth, ...token, isAdmin, loading: false };
+  const isAuth = refreshToken.accessExp - new Date().getTime() + 5000 > 0;
+  const isAdmin = refreshToken.authorities.findIndex(i => i.authority === "ROLE_ADMIN") !== -1;
+  return { isAuth, ...refreshToken, access_token: token?.access_token, isAdmin, loading: false };
 }
 
 const jwtReducer: JWTReducer = (state = initState(), action) => {
@@ -22,13 +19,11 @@ const jwtReducer: JWTReducer = (state = initState(), action) => {
         loading: true
       }
     case 'SET_TOKEN_SUCCESS':
-      return initState(action.payload as TokenObject);
+      return initState();
     case 'REMOVE_TOKEN':
-      state = initState();
-      return state;
+    case 'REMOVE_TOKEN_SUCCESS':
+      return initState();
     case 'REFRESH':
-      return state;
-    case 'REFRESH_SUCCESS':
       return state;
     default:
       return state;

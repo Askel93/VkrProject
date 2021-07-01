@@ -1,23 +1,33 @@
-import { Ship, ShipReducer, ShipState } from '../types';
+import { Ship, ShipReducer, initShipState, ShipState, FetchPayload, } from '../types';
 
-const initState: ShipState = {
-  ship: null,
-  error: null,
-  ships: [],
-  count: 0,
-  loading: false
+const initState = (state: ShipState = initShipState): ShipState => {
+  const stateInitString = sessionStorage.getItem("ships");
+  if (stateInitString !== null) {
+    const initState: { ships: Ship[], fetchPayload: FetchPayload } = JSON.parse(stateInitString);
+    return { ...state, ...initState }
+  }
+  return state;
 }
 
-const shipReducer: ShipReducer = (state = initState, action) => {
+const shipReducer: ShipReducer = (state = initState(), action) => {
   const { type, payload } = action;
   switch(type) {
     case 'SAVE_SHIP':
     case 'UPDATE_SHIP':
     case 'FETCH_SHIP':
+    case 'DELETE_SHIPS':
+    case 'DELETE_SHIP':
+    case 'GET_COUNT_PAGE':
+      return {
+        ...state,
+        loading: true,
+        error: null
+      }
     case 'FETCH_SHIPS':
       return {
         ...state,
-        loading: true
+        loading: true,
+        error: null,
       }
     case 'FETCH_SHIPS_SUCCESS':
       return {
@@ -27,25 +37,35 @@ const shipReducer: ShipReducer = (state = initState, action) => {
       }
     case 'SHIP_FAILURE':
       return {
-        ...state,
+        ...initState(state),
         loading: false,
         error: payload as string
+      }
+    case 'UPDATE_SHIP_SUCCESS':
+    case 'DELETE_SHIP_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        ship: null
       }
     case 'GET_COUNT_PAGE_SUCCESS':
       return {
         ...state,
+        loading: false,
         count: payload as number
       }
-    case 'UPDATE_SHIP_SUCCESS':
     case 'SAVE_SHIP_SUCCESS':
       return {
         ...state,
-        loading: false
+        loading: false,
+        error: null
       }
     case 'FETCH_SHIP_SUCCESS':
       return {
         ...state,
         loading: false,
+        error: null,
         ship: payload as Ship
       }
     default:

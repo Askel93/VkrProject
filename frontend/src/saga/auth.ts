@@ -1,36 +1,30 @@
 import { all, call, put, take, takeEvery } from 'redux-saga/effects';
 
-import { signIn, logOut, signUp } from "../services/authService";
-import { 
+import { signIn, signUp } from "../services/authService";
+import {
   loginSuccess,
-  logoutSuccess,
   signUpSuccess,
-  authFailure
-} from '../actions/auth';
-import { AuthActions, TokenObject, LoginUser, User, AuthKeys } from '../types';
-import { removeToken } from './jwt';
-import { jwtSetToken, historyPush } from '../actions';
-
-
-function* loginSuccessSaga(action: AuthActions) {
-  const token: TokenObject = action.payload as TokenObject;
-  yield put(jwtSetToken(token));
-  yield take('SET_TOKEN_SUCCESS');
-  yield call(historyPush, "/ship");
-}
+  authFailure,
+  jwtSetToken,
+  historyPush,
+} from '../actions';
+import { AuthActions, TokenObject, LoginUser, User, AuthKeys, UserKeys, UserActions } from '../types';
 
 //Listner loginRequest; action.payload loginUser
 //Listner signUpSuccess; action.payload loginUser
-function* login(action: AuthActions) {
+function* login(action: AuthActions | UserActions) {
   try {
-    const loginUser = action.payload as LoginUser
-    const res: TokenObject = yield call(signIn, loginUser);
-    res.accessExp = new Date().getMilliseconds() + res.expires_in * 1000 - 5000;
-    //yield call(saveToken, res);
-    yield put(loginSuccess(res));
+    const loginUser: LoginUser = yield action.payload;
+    let prevPath: string | undefined = yield action.prevPath;
+    let res: TokenObject = yield call(signIn, loginUser);
+    res.isRemember = loginUser.isRemember;
+    yield put(jwtSetToken(res));
+    yield take('SET_TOKEN_SUCCESS');
+    prevPath = prevPath && !prevPath.includes("/auth") ? prevPath : "/ships";
+    yield call(historyPush, prevPath);
+    yield put(loginSuccess(res, prevPath));
   } catch (err) {
-    const error : string = err.message;
-    yield put(authFailure(error));
+    yield put(authFailure(err.error_description));
   }
 }
 
@@ -38,25 +32,11 @@ function* register(action: AuthActions) {
   try {
     const newUser: User = yield action.payload as User;
     yield call(signUp, newUser);
-    
     yield put(signUpSuccess(newUser));
-  } catch (err) {
-    const error: Error = err;
-    yield put(authFailure(error.message));
-  }
-}
 
-function* logout() {
-  try {
-    const response: Response = yield call(logOut);
-    if (response.status === 200) {
-      yield put(logoutSuccess());
-      yield call(removeToken)
-    } else {
-      throw response.json();
-    }
   } catch (err) {
-    yield put(authFailure(err.message));
+    const error = err as Error;
+    yield put(authFailure(error.message));
   }
 }
 
@@ -65,9 +45,7 @@ function* authSaga() {
     //login
     takeEvery<AuthKeys>('LOGIN', login),
     takeEvery<AuthKeys>('SIGN_UP_SUCCESS', login),
-    takeEvery<AuthKeys>('LOGIN_SUCCESS', loginSuccessSaga),
-    //logout
-    takeEvery<AuthKeys>('LOGOUT', logout),
+    takeEvery<UserKeys>('UPDATE_PROFILE_SUCCESS', login),
     //signUp
     takeEvery<AuthKeys>('SIGN_UP', register),
   ]);

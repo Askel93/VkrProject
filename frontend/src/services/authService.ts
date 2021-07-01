@@ -19,7 +19,7 @@ const signIn = (loginUser: LoginUser) => api<TokenObject>(
 const getPrincipal = (token: string) => api<Principal>(
   `${urlConstants.AUTH_SERVICE}/users/current`,
   { 
-    method: "GET", 
+    method: "GET",
     headers: new Headers({ 'Authorization': `Bearer ${token}` }),
   });
 
@@ -32,16 +32,17 @@ const signUp = (newUser: User) => createApi<any>(
     },
   });
 
-const refreshToken = (token: TokenObject) => api<TokenObject>(
+const refreshToken = (token: string) => api<TokenObject>(
   `${urlConstants.AUTH_SERVICE}/oauth/token`, { 
     method: "POST",
     body: new URLSearchParams({
-      'refresh_token': token.refresh_token,
+      'refresh_token': token,
       'grant_type': 'refresh_token',
       'scope': 'ui',
     }),
     headers: {
       'Authorization': 'Basic YnJvd3Nlcjo=',
+      'Access-Control-Allow-Origin' : 'https://localhost',
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   });

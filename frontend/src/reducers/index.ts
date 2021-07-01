@@ -7,6 +7,7 @@ import jwtReducer from './jwtReducer';
 import ownOperatorReducer from './ownOperatorReducer';
 import shipReducer from './shipReducer';
 import userReducer from './userReducer';
+import filterReducer from './filterReducer';
 
 const rootReducer = combineReducers({
   routing: routerReducer,
@@ -15,7 +16,8 @@ const rootReducer = combineReducers({
   jwt: jwtReducer,
   ownOperator: ownOperatorReducer,
   user: userReducer,
-  ship: shipReducer
+  ship: shipReducer,
+  filter: filterReducer,
 });
 
 export default rootReducer;

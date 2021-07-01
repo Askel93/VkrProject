@@ -1,69 +1,64 @@
-import { all, call, delay, put, take, takeEvery } from 'redux-saga/effects';
+import { all, call, delay, put, select, take, takeEvery } from 'redux-saga/effects';
 
-import { jwtRemoveToken, jwtSetTokenSuccess, refreshRequest, refreshSuccess } from '../actions/jwt';
+import { jwtRemoveToken, jwtRemoveTokenSuccess, jwtSetTokenSuccess, refreshSuccess, historyPush } from '../actions';
+import { jwtSelector } from '../selector';
 import { getPrincipal, refreshToken } from '../services/authService';
-import { AuthActions, TokenObject, JWTActions, Principal } from '../types';
+import { AuthActions, TokenObject, JWTActions, Principal, JWTState } from '../types';
 
-const isTokenChanged = (action: JWTActions | AuthActions) => ['LOGIN_SUCCESS', 'SET_TOKEN'].indexOf(action.type) >= 0;
-
-export function* saveToken(action: JWTActions | AuthActions) {
+function* saveToken(action: JWTActions | AuthActions) {
   let token: TokenObject = yield action.payload;
   const principal: Principal = yield call(getPrincipal, token.access_token);
   token.authorities = principal.authorities;
-  token.accessExp = new Date().getTime() + token.expires_in * 1000;
-  localStorage.setItem("token", JSON.stringify(token));
+  token.accessExp = new Date().getTime() + token.expires_in * 1000 - 5000;
+  const refreshToken = { refresh_token: token.refresh_token, authorities: token.authorities, accessExp: token.accessExp, isRemember: token.isRemember }
+  const accessToken = { access_token: token.access_token }
+  if (token.isRemember) {
+    localStorage.setItem("refresh_token", JSON.stringify(refreshToken));
+  } else {
+    sessionStorage.setItem("refresh_token", JSON.stringify(refreshToken))
+  }
+  sessionStorage.setItem("access_token", JSON.stringify(accessToken));
   yield put(jwtSetTokenSuccess(token));
 }
 
-export function* removeToken() {
-  localStorage.removeItem("token")
-  yield put(jwtRemoveToken());
+function* removeToken() {
+  localStorage.clear();
+  sessionStorage.clear();
+  yield put(jwtRemoveTokenSuccess());
+  yield call(historyPush, "/auth/signin");
 }
 
-function* refresh(token: TokenObject) {
-  yield put(refreshRequest());
-  try {
-    const newToken: TokenObject = yield call(refreshToken, token);
-    newToken.accessExp = new Date().getTime() + newToken.expires_in;
-    yield put(refreshSuccess(newToken));
-  } catch(err) {
-    yield call(removeToken);
+function* refresh(token: JWTState) {
+  let refreshInterval = (token.accessExp || 0) - new Date().getTime();
+  if (refreshInterval > 0 && token.access_token) {
+    yield delay(refreshInterval);
   }
-}
-const getTokens = () => {
-  const token = localStorage.getItem("token");
-  return token === null ? null : JSON.parse(token) as TokenObject;
+  try {
+    let newToken: TokenObject = yield call(refreshToken, token.refresh_token!);
+    newToken.isRemember = token.isRemember;
+    yield put(refreshSuccess(newToken));
+  } catch(e) {
+    yield put(jwtRemoveToken());
+  }
 }
 
 function* initSaga() {
-  while(true) {
-    let token: TokenObject | null = yield call(getTokens);
-    if (!token) {
+  while (true) {
+    let token: JWTState = yield select(jwtSelector);
+    if (!token.refresh_token || !token.accessExp) {
       yield take('SET_TOKEN_SUCCESS');
       continue;
     }
-    let refreshInterval: number = token.accessExp - new Date().getTime();
-
-    if (refreshInterval < 0) {
-      refreshInterval = 0;
-      // yield call(removeToken);
-      // continue;
-    } else if (refreshInterval > 5000) {
-      refreshInterval = refreshInterval - 5000;
-    }
-
-    yield delay(refreshInterval)
-    yield call(refresh, token);
+    yield call(refresh, token)
+    yield take('SET_TOKEN_SUCCESS');
   }
 }
 
-function* jwtSaga() {
+export default function* jwtSaga() {
   yield all([
     takeEvery('SET_TOKEN', saveToken),
-    //takeEvery('LOGIN_SUCCESS', saveToken), //save token to session storage and store
     takeEvery('REFRESH_SUCCESS', saveToken),
+    takeEvery('REMOVE_TOKEN', removeToken),
     initSaga()
   ])
 }
-
-export default jwtSaga;

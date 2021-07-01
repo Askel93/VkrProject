@@ -1,36 +1,41 @@
-import { FetchPayload, OwnOperator, Ship, ListResponse, urlConstants } from '../types';
+import { FetchPayload, Ship, ListResponse, urlConstants } from '../types';
 import { api, withAuth, createApi, deleteApi } from './util';
 
-const fetchShips = (payload: FetchPayload) => {
-  const param = [["page", payload.page.toString()], ["size", payload.size.toString()]];
-  if (payload.sort !== undefined) {
-    param.push(["sort", payload.sort]);
+const fetchShips = (data: FetchPayload) => {
+  const param = [["page", data.page.toString()], ["size", data.size.toString()]];
+  if (data.sort !== undefined) {
+    param.push(["sort", data.sort]);
   }
-  const url = `${urlConstants.SHIP_SERVICE}/ship?` + new URLSearchParams(param).toString();
+  const searchParam = data.search && data.search !== "" ? (data.search + "&") : "?" 
+  const urlParams = searchParam + new URLSearchParams(param).toString()
+  const url = `${urlConstants.SHIP_SERVICE}/ship` + urlParams;
   return api<Ship[]>(url, { method: "GET" });
 }
 
-const fetchCountPage = (size: number) => api<number>(
-  `${urlConstants.SHIP_SERVICE}/ship/count?` + new URLSearchParams({ "size": size.toString()}),
-  { method: "GET"});
-
+const fetchShipCountPage = (data: FetchPayload) => {
+  const param = [["size", data.size.toString()]];
+  const searchParam = data.search && data.search !== "" ? (data.search + "&") : "?" 
+  const urlParams = searchParam  + new URLSearchParams(param).toString();
+  const url = `${urlConstants.SHIP_SERVICE}/ship/count` + urlParams;
+  return api<number>(url, { method: "GET"});
+}
 const fetchShip = (id: number) => api<Ship>(
-  `${urlConstants.SHIP_SERVICE}/ship/${id}`,
+  `${urlConstants.SHIP_SERVICE}/ship/id?id=${id}`,
   { method: "GET" });
 
 const saveShip = (ship: Ship) => createApi<Ship>(
   `${urlConstants.SHIP_SERVICE}/ship`,
-  { method: "POST", headers: withAuth(), body: JSON.stringify(ship) });
+  { method: "POST", headers: withAuth(), body: JSON.stringify({ _type: 'ship', ...ship}) });
 
 const updateShip = (ship: Ship) => api<Ship>(
   `${urlConstants.SHIP_SERVICE}/ship/`,
   {
     method: "PUT", 
     headers: withAuth(new Headers({ "Content-Type": "application/json" })), 
-    body: JSON.stringify(ship)
+    body: JSON.stringify({ _type: 'ship', ...ship})
   });
 
-const deleteAllById = (data: ListResponse) => deleteApi(
+const deleteAllShipsById = (data: ListResponse) => deleteApi(
   `${urlConstants.SHIP_SERVICE}/ship/all`,
   { 
     method: "DELETE",
@@ -38,40 +43,16 @@ const deleteAllById = (data: ListResponse) => deleteApi(
     body: JSON.stringify(data)
   });
 
-const fetchOwnOperator = (name: string) => api<OwnOperator>(
-  `${urlConstants.SHIP_SERVICE}/ownoperator/${name}`,
-  { method: "GET" });
-  
-const fetchUpdateOwnOperator = (data: OwnOperator) => api<OwnOperator>(
-  `${urlConstants.SHIP_SERVICE}/ownoperator/`,
-  { 
-    method: "PUT", 
-    headers: withAuth(new Headers({ "Content-Type": "application/json" })), 
-    body: JSON.stringify(data) 
-  });
-
-const fetchOwnOperators = (payload: FetchPayload) => {
-  const param = [["page", payload.page.toString()], ["size", payload.size.toString()]];
-  if (payload.sort !== undefined) {
-    param.push(["sort", payload.sort]);
-  }
-  const url = `${urlConstants.SHIP_SERVICE}/ownoperator?` + new URLSearchParams(param).toString();
-  return api<OwnOperator[]>(url, { method: "GET" });
-}
-
-const fetchOwnCountPage = (size: number) => api<number>(
-  `${urlConstants.SHIP_SERVICE}/ownoperator/count?` + new URLSearchParams([["size", size.toString()]]).toString(),
-  { method: "GET" });
+const deleteShipById = (data: ListResponse) => deleteApi(
+  `${urlConstants.SHIP_SERVICE}/ship/id?id=${data.listId[0]}`,
+  { method: "DELETE", headers: withAuth() });
 
 export {
   fetchShips,
-  fetchCountPage,
+  fetchShipCountPage,
   fetchShip,
   saveShip,
   updateShip,
-  fetchOwnOperator,
-  fetchOwnOperators,
-  fetchUpdateOwnOperator,
-  deleteAllById,
-  fetchOwnCountPage,
+  deleteAllShipsById,
+  deleteShipById,
 }
