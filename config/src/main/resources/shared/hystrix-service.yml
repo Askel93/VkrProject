@@ -1,0 +1,22 @@
+hystrix:
+  dashboard:
+    proxy-stream-allow-list: '*'
+
+endpoints:
+  restart:
+    enabled: true
+  shutdown:
+    enabled: true
+
+InstanceDiscovery:
+  impl: io.spring.platform.netflix.turbine.EurekaInstanceDiscovery
+
+turbine:
+  appConfig: account-service, excel-service, ship-service
+#  clusterNameExpression:  new String("default")
+  clusterNameExpression: metadata['cluster']
+  instanceUrlSuffix:
+    ACCOUNT-SERVICE: /accounts/actuator/hystrix.stream
+    EXCEL-SERVICE: /excel/actuator/hystrix.stream
+    SHIP-SERVICE: /ship/actuator/hystrix.stream
+  aggregator.clusterConfig: ACCOUNT-SERVICE, EXCEL-SERVICE, SHIP-SERVICE
