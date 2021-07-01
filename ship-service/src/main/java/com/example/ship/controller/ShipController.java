@@ -1,19 +1,20 @@
 package com.example.ship.controller;
 
 import com.example.ship.config.View;
-import com.example.ship.exception.ResourceNotFoundException;
 import com.example.ship.model.Ship;
+import com.example.ship.response.BaseResponse;
 import com.example.ship.response.Filters;
 import com.example.ship.response.ListResponse;
 import com.example.ship.response.ShipResponse;
 import com.example.ship.service.ShipService;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -23,33 +24,22 @@ public class ShipController extends BaseController<Ship, Integer> {
 
     private final ShipService service;
 
-    public ShipController(ShipService service) {
-        super(service);
+    public ShipController(ShipService service, BaseResponse<ShipResponse, Ship> response) {
+        super(service, response);
         this.service = service;
     }
 
-    @Override
-    @GetMapping("/{id}")
-    @JsonView(View.UI.class)
-    public ResponseEntity<?> getById(@PathVariable("id") Integer id) throws ResourceNotFoundException {
-        return ResponseEntity.ok(ShipResponse.toResponse(service.findById(id)));
-    }
-
     @PutMapping("/")
-    public ResponseEntity<?> updateShip(@RequestBody Ship ship) {
-        return ResponseEntity.ok(service.update(ship));
-    }
-
-    @PostMapping("/all")
-    @JsonView(View.REST.class)
-    public ResponseEntity<?> saveAll(@RequestBody List<Ship> ships) {
-        log.info("save ships");
-        service.saveAll(ships);
-        return ResponseEntity.ok().body("");
+    @JsonView(View.UI.class)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> updateShip(@RequestBody ShipResponse response) {
+        var updatedShip = service.update(response.toDto());
+        return ResponseEntity.ok(response.toListResponse(updatedShip));
     }
 
     @GetMapping("")
     @JsonView(View.UI.class)
+    @HystrixCommand(fallbackMethod = "shipsFallback")
     public ResponseEntity<?> getShipsWithSort(@RequestParam(value = "page", required = false, defaultValue = "1") int page,
                                               @RequestParam(value = "size", required = false, defaultValue = "20") int size,
                                               @RequestParam(value = "sort", required = false, defaultValue = "id") String sort,
@@ -59,7 +49,7 @@ public class ShipController extends BaseController<Ship, Integer> {
             service
                 .findPage(page - 1, size, sort, searchText, filters)
                 .stream()
-                .map(ShipResponse::toListResponse)
+                .map(response::toListResponse)
                 .collect(Collectors.toList())
         );
     }
@@ -78,5 +68,10 @@ public class ShipController extends BaseController<Ship, Integer> {
         log.info("delete ships");
         service.deleteAllById(listResponse.getListId());
         return ResponseEntity.ok("Delete success");
+    }
+
+    @SuppressWarnings("unused")
+    public ResponseEntity<?> shipsFallback(int page, int size, String sort, String searchText, Filters filters) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error server");
     }
 }
