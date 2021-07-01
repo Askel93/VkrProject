@@ -1,6 +1,67 @@
-.nav-item:first-child {
-  margin-left: 10px;
+.menu-list .nav-item:first-child {
+  margin-left: 0;
 }
-.nav-item {
-  margin: 5px;
+.menu-list .nav-item {
+  border: 2px solid #c9d6df;
+  border-radius: 2px;
+  padding: 5px 15px;
+  -moz-transition: all 0.5s ease-out;
+  -o-transition: all 0.5s ease-out;
+  -webkit-transition: all 0.5s ease-out;
+  transition: all 0.5s ease-out;
+  height: 40px;
+  margin: auto 2px;
+}
+.nav-item a, .nav-item button {
+  color: #52616b;
+  text-decoration: none;
+  height: 25px;
+  display: block;
+}
+.menu-list .nav-item:hover, .active.nav-item {
+  box-shadow: 0 0 0 .1rem #52616b;
+}
+.menu {
+  display: block;
+  padding: 1% 2.5%;
+  height: 58px;
+}
+.menu-list {
+  display: flex;
+}
+.mobile-menu {
+  display: none;
+  background-color: #52616b;
+}
+.mobile-menu a, .mobile-menu button {
+  color: white !important;
+  width: 100% !important;
+}
+.mobile-menu .nav-item button {
+  background: transparent !important;
+  transition: none !important;
+}
+.mobile-menu .nav-item {
+  text-align: center;
+  padding: 0.5rem;
+  transition: 0.5s;
+}
+.mobile-menu button {
+  /* background-color: #52616b; */
+  transition: 0.5s;
+}
+.mobile-menu button:hover, .mobile-menu .nav-item:hover {
+  background-color: #97a4ac;
+}
+.mobile-menu button:focus, .mobile-menu .nav-item button:focus {
+  box-shadow: none;
+  text-decoration: none;
+}
+@media all and (max-width: 768px) {
+  .menu {
+    display: none;
+  }
+  .mobile-menu {
+    display: block;
+  }
 }
