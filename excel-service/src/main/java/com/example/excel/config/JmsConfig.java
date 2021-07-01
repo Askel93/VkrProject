@@ -30,7 +30,6 @@ public class JmsConfig {
 	@Primary
 	public ConnectionFactory connectionFactory() {
 		var factory = new ActiveMQConnectionFactory(jmsProperties.getUser(), jmsProperties.getPassword(), jmsProperties.getUrl());
-//		factory.setTrustedPackages(singletonList(JmsResponse.class.getPackage().getName()));
 		factory.setTrustAllPackages(true);
 		return factory;
 	}
@@ -51,8 +50,7 @@ public class JmsConfig {
 
 	@SuppressWarnings("SpellCheckingInspection")
 	@Bean
-	public JmsListenerContainerFactory<?> myFactory(ConnectionFactory connectionFactory,
-																									DefaultJmsListenerContainerFactoryConfigurer configurer) {
+	public JmsListenerContainerFactory<?> myFactory(ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configurer) {
 		DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
 		factory.setMessageConverter(jacksonJmsMessageConverter());
 		configurer.configure(factory, connectionFactory);

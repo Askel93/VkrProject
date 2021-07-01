@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("SpellCheckingInspection")
 @Component("enginesParser")
 public class EnginesParser extends ExcelParserBase<List<Engine>> {
 
@@ -20,9 +19,9 @@ public class EnginesParser extends ExcelParserBase<List<Engine>> {
 		Engine engine3 = parseEngine(row, 2);
 
 		List<Engine> engines = new ArrayList<>();
-		engines.add(engine1);
-		engines.add(engine2);
-		engines.add(engine3);
+		if (engine1 != null) engines.add(engine1);
+		if (engine2 != null) engines.add(engine2);
+		if (engine3 != null) engines.add(engine3);
 
 		return new ParseResult<>(engines, "");
 	}

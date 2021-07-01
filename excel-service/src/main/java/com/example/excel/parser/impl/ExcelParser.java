@@ -50,7 +50,7 @@ public class ExcelParser extends ExcelParserBase<ParseModel> {
 			var ownOperators = ownOperatorResult.getT();
 			errorString.append(ownOperatorResult.getError());
 
-			ShipEngine shipEngine = new ShipEngine(ship, engines.get(0), engines.get(1), engines.get(2));
+			ShipEngine shipEngine = new ShipEngine(ship, engines);
 
 			capacity.setRegNum(ship.getId());
 			dimensions.setRegNum(ship.getId());
@@ -79,10 +79,7 @@ public class ExcelParser extends ExcelParserBase<ParseModel> {
 		ShipDimensions dimensions = ship.getShipDimensions();
 		ShipEngine shipEngine = ship.getShipEngine();
 
-		List<Engine> engines = new ArrayList<>();
-		engines.add(shipEngine.getEngine1());
-		engines.add(shipEngine.getEngine2());
-		engines.add(shipEngine.getEngine3());
+		var engines = shipEngine.getEngines();
 
 		List<OwnOperator> ownOperators = new ArrayList<>();
 		ownOperators.add(ship.getOwn());

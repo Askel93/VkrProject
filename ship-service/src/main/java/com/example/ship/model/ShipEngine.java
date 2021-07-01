@@ -1,12 +1,12 @@
 package com.example.ship.model;
 
-import com.example.ship.config.View;
 import com.example.ship.response.EnginesFilter;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @SqlResultSetMapping(name = "enginesFilterResult", classes = {
 		@ConstructorResult(
@@ -26,29 +26,46 @@ import javax.persistence.*;
 @Table(name = "ship_engine")
 @Data
 @NoArgsConstructor
-@JsonView(View.UI.class)
 public class ShipEngine {
 
 	@Id
 	@Column(name = "reg_num")
 	private int regNum;
-	@JsonView(View.REST.class)
-	@OneToOne(fetch = FetchType.LAZY, optional = false)
+	@JsonIgnore
+	@OneToOne(optional = false )
 	@JoinColumn(name = "reg_num", referencedColumnName = "reg_num")
 	private Ship ship;
 
-	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "eng_1", referencedColumnName = "id", columnDefinition = "uuid")
-	private Engine engine1;
-
-	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "eng_2", referencedColumnName = "id", columnDefinition = "uuid")
-	private Engine engine2;
-
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "eng_3", referencedColumnName = "id", columnDefinition = "uuid")
-	private Engine engine3;
+	@OneToMany(
+			cascade = CascadeType.MERGE,
+			mappedBy = "shipEngine",
+			orphanRemoval = true,
+			fetch = FetchType.EAGER
+	)
+	private List<Engine> engines;
 
 	@Column(name = "sum_pwr")
 	private int sumPwr;
+
+	public ShipEngine(int regNum) {
+		this.regNum = regNum;
+	}
+
+
+	public void setEngines(List<Engine> engines) {
+		this.engines = engines;
+		setShipEngineToEngines();
+	}
+
+	public void setShipEngineToEngines() {
+		if (engines != null) engines.forEach(engine -> engine.setShipEngine(this));
+		editSumPwr();
+	}
+
+	@JsonIgnore
+  private void editSumPwr() {
+		sumPwr =  0;
+		if (engines == null) return;
+		engines.forEach(engine -> sumPwr += engine.getPwr() * engine.getCount());
+	}
 }
