@@ -1,0 +1,22 @@
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: 'create-drop'
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jackson:
+    deserialization:
+      ACCEPT_SINGLE_VALUE_AS_ARRAY: true
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+      FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY: false
+    mapper:
+      DEFAULT_VIEW_INCLUSION: true
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
