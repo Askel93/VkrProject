@@ -28,11 +28,10 @@ public interface AccountService {
     /**
      * Save {@link Account} for the given {@link AccountResponse}
      * @param accountResponse must not be {@literal null}
-     * @exception ResourceExistsException if User with given {@code userName} already exists
-     * @exception com.example.account.exception.ResourceExistsException if User with given {@code email} already exists
+     * @throws ResourceExistsException if User with given {@code userName} or {@code email} already exists
      * @return saved {@link Account}
      */
-    Account createUser(AccountResponse accountResponse);
+    Account createUser(AccountResponse accountResponse) throws ResourceExistsException;
 
     void updateUser(AccountResponse accountResponse, String prevName);
 }
