@@ -43,11 +43,10 @@ public class ShipController extends BaseController<Ship, Integer> {
     public ResponseEntity<?> getShipsWithSort(@RequestParam(value = "page", required = false, defaultValue = "1") int page,
                                               @RequestParam(value = "size", required = false, defaultValue = "20") int size,
                                               @RequestParam(value = "sort", required = false, defaultValue = "id") String sort,
-                                              @RequestParam(value = "search", required = false, defaultValue = "") String searchText,
                                               Filters filters) {
         return ResponseEntity.ok(
             service
-                .findPage(page - 1, size, sort, searchText, filters)
+                .findPage(page - 1, size, sort, filters)
                 .stream()
                 .map(response::toListResponse)
                 .collect(Collectors.toList())
@@ -57,9 +56,8 @@ public class ShipController extends BaseController<Ship, Integer> {
     @GetMapping("/count")
     public ResponseEntity<?> getCountPage(
         @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-        @RequestParam(value = "search", required = false, defaultValue = "") String searchText,
         Filters filters) {
-        return ResponseEntity.ok(service.getCountPage(size, searchText, filters));
+        return ResponseEntity.ok(service.getCountPage(size, filters));
     }
 
     @DeleteMapping("/all")
