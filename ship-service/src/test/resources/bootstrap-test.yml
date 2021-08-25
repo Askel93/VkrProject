@@ -1,0 +1,11 @@
+#Disable discovery
+spring:
+  cloud:
+    discovery.enabled: false
+    config:
+      discovery:
+        enabled: false
+      enabled: false
+logging.level.org.hibernate:
+  SQL: DEBUG
+#  type: TRACE

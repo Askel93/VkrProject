@@ -1,6 +1,0 @@
-spring:
-  profiles:
-    - test
-  application:
-    name: ship-service
-  main.allow-bean-definition-overriding: true
