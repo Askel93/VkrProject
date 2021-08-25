@@ -6,8 +6,7 @@ import com.example.ship.model.Ship;
 import com.example.ship.repository.FilterRepository;
 import com.example.ship.repository.ShipRepository;
 import com.example.ship.repository.impl.spec.ShipListIdSpecification;
-import com.example.ship.repository.impl.spec.ShipSearchSpecification;
-import com.example.ship.response.Filters;
+import com.example.ship.response.Filter;
 import com.example.ship.response.ShipFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -72,15 +71,13 @@ public class ShipRepositoryImpl
 	}
 
 	@Override
-	public long getCount(String searchText, Filters filters) {
-		ShipSearchSpecification spec = new ShipSearchSpecification(searchText, filters);
-		return super.count(spec);
+	public long getCount(Filter filter) {
+		return super.count(filter == null ? null : filter.getSpecification());
 	}
 
 	@Override
-	public List<Ship> findAllWithSearch(Pageable pageable, String searchText, Filters filters) {
-		ShipSearchSpecification spec = new ShipSearchSpecification(searchText, filters);
-		return super.findAll(spec, pageable).getContent();
+	public List<Ship> findAllWithSearch(Pageable pageable, Filter filter) {
+		return super.findAll(filter == null ? null : filter.getSpecification(), pageable).getContent();
 	}
 
 	@Override

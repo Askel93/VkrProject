@@ -3,7 +3,7 @@ package com.example.ship.service.impl;
 import com.example.ship.exception.ResourceNotFoundException;
 import com.example.ship.model.Ship;
 import com.example.ship.repository.ShipRepository;
-import com.example.ship.response.Filters;
+import com.example.ship.response.Filter;
 import com.example.ship.service.ExcelService;
 import com.example.ship.service.JmsService;
 import com.example.ship.service.ShipService;
@@ -38,14 +38,14 @@ public class ShipServiceImpl
     }
 
     @Override
-    public List<Ship> findPage(int page, int size, String sort, String searchText, Filters filters) {
+    public List<Ship> findPage(int page, int size, String sort, Filter filter) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sort));
-        return repository.findAllWithSearch(pageable, searchText, filters);
+        return repository.findAllWithSearch(pageable, filter);
     }
 
     @Override
-    public Integer getCountPage(int size, String searchText, Filters filters) {
-        double count = repository.getCount(searchText, filters);
+    public Integer getCountPage(int size, Filter filter) {
+        double count = repository.getCount(filter);
         return (int) Math.ceil(count / size);
     }
 

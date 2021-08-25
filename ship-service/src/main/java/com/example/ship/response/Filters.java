@@ -1,24 +1,31 @@
 package com.example.ship.response;
 
 import com.example.ship.config.View;
+import com.example.ship.model.Ship;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("SpellCheckingInspection")
 @Data
 @NoArgsConstructor
 @JsonView(View.REST.class)
-public class Filters {
+public class Filters implements Filter {
+
+	private String search;
 	/*
 	* Ship filter
 	*/
-	private Integer ns;
-	private Integer xs;
-	private Integer ng;
-	private Integer xg;
+	private Integer ns; //Min speed
+	private Integer xs; //Max speed
+	private Integer ng; //Min god
+	private Integer xg; //Max god
 	private List<String> ts; //Type ship
 	private List<String> ps; //Port ship
 
@@ -95,40 +102,46 @@ public class Filters {
 		xpwr = filter.getMaxPwr();
 	}
 
-	public boolean isShipFilterEmpty() {
-		return ts == null
-				&& ns == null
-				&& ng == null
-				&& ps == null;
+	private Specification<Ship> getShipFilter() {
+		return new ShipFilter(ng, xg, ns, xs, ts, ps).getSpecification();
 	}
 
-	public boolean isCapacityFilterEmpty() {
-		return nd == null
-				&& xd == null
-				&& npk == null
-				&& xpk == null
-				&& npp == null
-				&& xpp == null
-				&& nnt == null
-				&& xnt == null
-				&& ngt == null
-				&& xgt == null;
+	private Specification<Ship> getCapacityFilter() {
+		return new CapacityFilter(nd, xd, npk, xpk, npp, xpp, nnt, xnt, ngt, xgt).getSpecification();
 	}
 
-	public boolean isDimensionsFilterEmpty() {
-		return ndp == null
-				&& xdp == null
-				&& nl == null
-				&& xl == null
-				&& nb == null
-				&& xb == null
-				&& ndt == null
-				&& xdt == null
-				&& ndh == null
-				&& xdh == null;
+	private Specification<Ship> getDimensionsFilter() {
+		return new DimensionsFilter(ndp, xdp, nl, xl, nb, xb, ndt, xdt, ndh, xdh).getSpecification();
 	}
 
-	public boolean isEnginesFilterEmpty() {
-		return npwr == null && xpwr == null;
+	private Specification<Ship> getEnginesFilter() {
+		return new EnginesFilter(npwr, xpwr).getSpecification();
+	}
+
+	private Specification<Ship> getSearchFilter() {
+		return (root, query, builder) -> {
+			if (search != null && !search.trim().equals("")) {
+				var searchParam = "%" + search + "%";
+				List<Predicate> searchPredicates = new ArrayList<>();
+				searchPredicates.add(builder.like(builder.upper(root.get("ownName")), searchParam));
+				searchPredicates.add(builder.like(builder.upper(root.get("operatorName")), searchParam));
+				searchPredicates.add(builder.like(builder.upper(root.get("name")), searchParam));
+				searchPredicates.add(builder.like(builder.upper(root.get("type")), searchParam));
+				searchPredicates.add(builder.like(builder.upper(root.get("subType")), searchParam));
+				return builder.or(searchPredicates.toArray(new Predicate[] {}));
+			}
+			return null;
+		};
+	}
+
+	@Override
+	@JsonIgnore
+	public Specification<Ship> getSpecification() {
+			return getShipFilter()
+					.and(getSearchFilter())
+					.and(getCapacityFilter())
+					.and(getDimensionsFilter())
+					.and(getEnginesFilter())
+					;
 	}
 }
